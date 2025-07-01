@@ -28,6 +28,8 @@
 
 #include <graphics/GLTransformations/Transformations.h>
 
+#include "graphics/Lighting/LightManager.h"
+
 #include "graphics/Camera/Camera.h"
 
 #include "core/Logger.h"
@@ -82,6 +84,24 @@ namespace SCENE
             sphere->addInputComponent(std::make_shared<InputComponent::SunInputComponent>(
                 sphere->getTransform(), inputContext));
             AddObjectIntoScene(sphere);
+
+			auto lightData = std::make_shared<LIGHTING::LightData>(sphere->getTransform()->getPosition());
+			if (!lightData) {
+				Logger::warn("[Scene::initResources] lightData is nullptr!");
+				continue;
+			}
+
+			auto light = std::make_shared<LIGHTING::Light>(sphere, lightData);
+			if (!light) {
+				Logger::warn("[WARN] [Scene::initResources] light is nullptr, creating light object skipping!");
+				continue;
+			}
+
+			// we are converting int to LightType for setting light type
+			// in that case setLightType taking sequential values according to the loop
+			light->setLightType(static_cast<LIGHTING::LightType>(i));
+
+			getLightManager()->addLight(light);
         }
 
 		// CUBES

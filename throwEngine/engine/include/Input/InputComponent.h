@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "Input/InputContext.h"
+#include <vector>
 
 namespace GLgraphics { class Transformations; }
 namespace SCENE { class Scene; };
@@ -83,6 +84,9 @@ namespace InputComponent
 	private:
 		std::shared_ptr<GLgraphics::Transformations> m_transformation;
 		Input::InputContext m_dataContext;
+
+		int m_activeLightComponentIdx = 0;
+		std::vector<bool> m_inputSelectors;
 	};
 
 }

@@ -115,7 +115,8 @@ namespace SCENE
 
 		iShader->bind();
 
-		lightManager->uploadLights(iShader->getGLShaderProgram());
+		if (iShader->getType() != SHADER::ShaderType::LIGHT)
+			lightManager->uploadLights(iShader->getGLShaderProgram());
 
 		iShader->setMaterial(material);
 		iShader->setLights(lightManager->getLights());

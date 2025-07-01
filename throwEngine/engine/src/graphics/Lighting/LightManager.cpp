@@ -19,6 +19,8 @@ namespace LIGHTING
             return;
         }
 
+        shader->bind();
+
         // Check which lighting mode the shader supports
         bool useArray = shader->hasUniform("lights[0].position");
         bool useSingle = shader->hasUniform("light.position");

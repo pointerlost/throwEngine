@@ -83,37 +83,6 @@ namespace core {
 
 		scene->initGrid(renderData);
 
-		// do it some stuff!
-		// add object component names give them into getSpecificSceneObjectWithName function
-		if (!scene->getSpesificSceneObjectWithName("sphere_0")) {
-			Logger::warn("[Engine::initLighting] getSpesificSceneObjectWithName doesn't work!");
-		}
-		else {
-			lightData = std::make_shared<LIGHTING::LightData>(scene->getSpesificSceneObjectWithName("sphere_0")->getTransform()->getPosition());
-
-			if (!lightData) {
-				Logger::warn("[Engine::initLighting] lightData is nullptr!");
-			}
-
-			DEBUG_PTR(lightData);
-		}
-
-		// Warning! getSpecificSceneObjectWithName can be nullptr!
-		if (!scene->getSpesificSceneObjectWithName("sphere_0")) {
-			Logger::warn("[Engine::initLighting] getSpesificSceneObjectWithName doesn't work!");
-		}
-		else {
-			light = std::make_shared<LIGHTING::Light>(scene->getSpesificSceneObjectWithName("sphere_0"), lightData);
-
-			if (!light) {
-				Logger::warn("[WARN] [Engine::initLighting] light is nullptr!");
-			}
-
-			DEBUG_PTR(light);
-
-			lightManager->addLight(light);
-		}
-
 		Logger::info("Engine SetUpResources successfull!");
 		return true;
 	}

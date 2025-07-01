@@ -101,9 +101,7 @@ namespace core
 		// Texture Manager OFF
 
 		// Lighting ON
-		std::shared_ptr<LIGHTING::Light> light;
 		std::shared_ptr<LIGHTING::LightManager> lightManager;
-		std::shared_ptr<LIGHTING::LightData> lightData;
 		// Lighting OFF
 
 		std::unique_ptr<GRID::GridSystem> m_gridSystem;

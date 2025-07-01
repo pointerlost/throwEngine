@@ -121,10 +121,35 @@ namespace InputComponent
 			return;
 		}
 
+		m_inputSelectors.resize(lightVec.size(), false);
+		m_inputSelectors[m_activeLightComponentIdx] = true;
+
 		static bool isRotating = false;
 
 		if (Input::g_IsKeyHeld[GLFW_KEY_3]) {
 			isRotating = !isRotating;
+		}
+
+		if (Input::g_IsKeyPressed[GLFW_KEY_F10] && m_inputSelectors[m_activeLightComponentIdx]) {
+			m_inputSelectors[m_activeLightComponentIdx] = false;
+
+			if (m_activeLightComponentIdx == 0) {
+				m_activeLightComponentIdx = lightVec.size() - 1;
+			}
+			else {
+				--m_activeLightComponentIdx;
+			}
+		}
+
+		if (Input::g_IsKeyPressed[GLFW_KEY_F11] && m_inputSelectors[m_activeLightComponentIdx]) {
+			m_inputSelectors[m_activeLightComponentIdx] = false;
+
+			if (m_activeLightComponentIdx == lightVec.size() - 1) {
+				m_activeLightComponentIdx = 0;
+			}
+			else {
+				++m_activeLightComponentIdx;
+			}
 		}
 
 		glm::vec3 moveOffset{ 0.0 };
@@ -132,41 +157,44 @@ namespace InputComponent
 
 		for (const auto& obj : sceneObjects)
 		{
-			if (obj->getObjectName() == "sphere_0")
+			for (int i = 0; i < lightVec.size(); ++i)
 			{
-				m_transformation = obj->getTransform();
-				glm::vec3 objectPos = m_transformation->getPosition();
-
-				if (isRotating)
+				if ( obj->getObjectName() == "sphere_" + std::to_string(i) && m_inputSelectors[i] )
 				{
-					m_dataContext.m_angle += m_dataContext.m_rotationSpeed * m_dataContext.m_delta;
+					m_transformation = obj->getTransform();
+					glm::vec3 objectPos = m_transformation->getPosition();
 
-					glm::vec3 newPos{};
+					if (isRotating)
+					{
+						m_dataContext.m_angle += m_dataContext.m_rotationSpeed * m_dataContext.m_delta;
 
-					newPos.x = m_dataContext.m_radius * cos(m_dataContext.m_angle);
-					newPos.z = m_dataContext.m_radius * sin(m_dataContext.m_angle);
+						glm::vec3 newPos{};
 
-					newPos.y = 10 + 60 * sin(m_dataContext.m_angle);
+						newPos.x = m_dataContext.m_radius * cos(m_dataContext.m_angle);
+						newPos.z = m_dataContext.m_radius * sin(m_dataContext.m_angle);
 
-					m_transformation->setPosition(newPos);
-					lightVec[0]->update();
-				}
-				else {
-					if (Input::g_IsKeyHeld[GLFW_KEY_KP_8]) moveOffset.z -= moveSpeed;
-					if (Input::g_IsKeyHeld[GLFW_KEY_KP_2]) moveOffset.z += moveSpeed;
-					if (Input::g_IsKeyHeld[GLFW_KEY_KP_4]) moveOffset.x -= moveSpeed;
-					if (Input::g_IsKeyHeld[GLFW_KEY_KP_6]) moveOffset.x += moveSpeed;
-					if (Input::g_IsKeyHeld[GLFW_KEY_KP_7]) moveOffset.y += moveSpeed;
-					if (Input::g_IsKeyHeld[GLFW_KEY_KP_1]) moveOffset.y -= moveSpeed;
+						newPos.y = 10 + 60 * sin(m_dataContext.m_angle);
 
-					if (glm::length(moveOffset) > 0.0) {
-						glm::vec3 newPos = objectPos + moveOffset;
 						m_transformation->setPosition(newPos);
-						lightVec[0]->update();
+						lightVec[i]->update();
 					}
-				}
+					else {
+						if (Input::g_IsKeyHeld[GLFW_KEY_KP_8]) moveOffset.z -= moveSpeed;
+						if (Input::g_IsKeyHeld[GLFW_KEY_KP_2]) moveOffset.z += moveSpeed;
+						if (Input::g_IsKeyHeld[GLFW_KEY_KP_4]) moveOffset.x -= moveSpeed;
+						if (Input::g_IsKeyHeld[GLFW_KEY_KP_6]) moveOffset.x += moveSpeed;
+						if (Input::g_IsKeyHeld[GLFW_KEY_KP_7]) moveOffset.y += moveSpeed;
+						if (Input::g_IsKeyHeld[GLFW_KEY_KP_1]) moveOffset.y -= moveSpeed;
 
-				break;
+						if (glm::length(moveOffset) > 0.0) {
+							glm::vec3 newPos = objectPos + moveOffset;
+							m_transformation->setPosition(newPos);
+							lightVec[i]->update();
+						}
+					}
+
+					break;
+				}
 			}
 		}
 	}
