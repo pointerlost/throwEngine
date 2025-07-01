@@ -1,0 +1,32 @@
+#include "graphics/Renderer/Renderer.h"
+
+#include "graphics/Renderer/RenderData.h"
+
+#include "Shaders/ShaderManager.h"
+
+#include "graphics/Camera/Camera.h"
+#include "Scene/Scene.h"
+#include "graphics/Textures/Textures.h"
+
+#include "core/Debug.h"
+#define DEBUG_PTR(ptr) DEBUG::DebugForEngineObjectPointers(ptr)
+
+
+namespace GLgraphics
+{
+	Renderer::Renderer(const std::shared_ptr<RenderData>& renderData)
+		: m_renderData(renderData)
+	{
+		DEBUG_PTR(renderData);
+	}
+
+
+	void Renderer::draw(std::shared_ptr<SCENE::Scene>& scene, const glm::mat4& view, const glm::mat4& projection) const
+	{
+		/* do it some stuff */
+
+		scene->updateAllObjects();
+
+		scene->drawAllObjects(view, projection, m_renderData);
+	}
+}

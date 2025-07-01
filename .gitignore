@@ -1,0 +1,61 @@
+# Build and temp folders
+build/
+build_*/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.sln
+*.vcxproj*
+*.opensdf
+*.sdf
+*.ipch
+*.obj
+*.log
+*.tlog
+*.pch
+*.pdb
+*.ilk
+*.cache
+*.db
+*.VC.db
+
+# VS specific
+.vs/
+*.user
+*.suo
+
+# VCPKG folders
+vcpkg_installed/
+**/vcpkg_installed/
+.vcpkg-root
+*.nupkg
+*.snupkg
+
+# Assets & build copy output
+assets/
+**/assets/
+GLSL/
+configs/
+
+# STB and third party
+external/
+thirdparty/
+*.lib
+*.dll
+*.exp
+
+# JSON, settings cache folders
+*.json
+*.log
+*.tmp
+
+# IDE & OS stuff
+.DS_Store
+Thumbs.db
+*.code-workspace
+.vscode/
+
+# CMake Preset Binary directiories
+build_debug/

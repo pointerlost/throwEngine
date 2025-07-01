@@ -1,0 +1,5 @@
+if we want to define a preprocessor from a lib like in the below;
+
+#define STB_IMAGE_IMPLEMENTATION
+
+i've to learn preprocessors and header-only process..

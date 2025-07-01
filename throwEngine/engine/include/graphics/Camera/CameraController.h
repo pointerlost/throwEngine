@@ -1,0 +1,25 @@
+#pragma once
+#include <iostream>
+#include <GLFW/glfw3.h>
+#include "Input/InputContext.h"
+
+namespace CAMERA
+{
+	class Camera;
+
+	class CameraInputSystem
+	{
+	public:
+		CameraInputSystem(Camera* cam, Input::InputContext context);
+
+		void processInput();
+
+		void setUpDataContext();
+
+	private:
+
+		Camera* camera;
+
+		Input::InputContext dataContext;
+	};
+}
