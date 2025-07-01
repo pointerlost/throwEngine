@@ -52,14 +52,6 @@ namespace SCENE
 			return false;
 		}
 
-		const auto& wrapperGLShader = renderData->getWrapperGLShader();
-		DEBUG_PTR(wrapperGLShader);
-
-		if (!wrapperGLShader) {
-			Logger::warn("[WARN] [SceneObject] Helper Shader missing! Skipping draw.");
-			return false;
-		}
-
 		auto lightManager = renderData->getLightManager();
 		DEBUG_PTR(lightManager);
 
@@ -107,7 +99,6 @@ namespace SCENE
 
 		auto& iShader = m_shaderInterface;
 		iShader->setRenderDataObject(renderData);
-		const auto& wrapperShader = renderData->getWrapperGLShader();
 		auto lightManager = renderData->getLightManager();
 		auto material = renderData->getMaterial()->getMaterialByName(m_materialName);
 		auto texture = renderData->getTexture();
