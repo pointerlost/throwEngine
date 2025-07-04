@@ -12,14 +12,15 @@ namespace CAMERA
 	public:
 		CameraInputSystem(Camera* cam, Input::InputContext context);
 
-		void processInput();
+		void processInput(GLFWwindow* window);
 
 		void setUpDataContext();
 
 	private:
-
 		Camera* camera;
 
 		Input::InputContext dataContext;
+
+		bool m_lockCamera = false;
 	};
 }

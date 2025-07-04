@@ -22,14 +22,14 @@ namespace LIGHTING
 	public:
 		LightManager() = default;
 
-		void addLight(const std::shared_ptr<Light>& light) { m_lights.push_back(light); };
+		void addLightToVec(const std::shared_ptr<Light>& light) { m_lightsVec.push_back(light); };
 
-		const std::vector<std::shared_ptr<Light>>& getLights() const { return m_lights; };
+		const std::vector<std::shared_ptr<Light>>& getLightsByVec() const { return m_lightsVec; };
 
 		void uploadLights(const std::shared_ptr<SHADER::GLShaderProgram>& shader) const;
 
 	private:
-		std::vector<std::shared_ptr<Light>> m_lights;
+		std::vector<std::shared_ptr<Light>> m_lightsVec;
 		static constexpr int MAX_LIGHTS = 4;
 	};
 }

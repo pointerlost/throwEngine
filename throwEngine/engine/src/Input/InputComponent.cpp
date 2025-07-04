@@ -9,6 +9,7 @@
 #include "Scene/SceneObject.h"
 
 #include "graphics/Lighting/LightManager.h"
+
 #include "graphics/Lighting/Light.h"
 
 #include "core/Logger.h"
@@ -115,87 +116,34 @@ namespace InputComponent
 			return;
 		}
 
-		std::vector<std::shared_ptr<LIGHTING::Light>> lightVec = lightManager->getLights();
+		std::vector<std::shared_ptr<LIGHTING::Light>> lightVec = lightManager->getLightsByVec();
 		if (lightVec.empty()) {
 			Logger::warn("[SunInputComponent] lightVec is empty.");
 			return;
 		}
 
-		m_inputSelectors.resize(lightVec.size(), false);
-		m_inputSelectors[m_activeLightComponentIdx] = true;
+		uint32_t lightVecSize = lightVec.size();
 
-		static bool isRotating = false;
-
-		if (Input::g_IsKeyHeld[GLFW_KEY_3]) {
-			isRotating = !isRotating;
-		}
-
-		if (Input::g_IsKeyPressed[GLFW_KEY_F10] && m_inputSelectors[m_activeLightComponentIdx]) {
-			m_inputSelectors[m_activeLightComponentIdx] = false;
-
-			if (m_activeLightComponentIdx == 0) {
-				m_activeLightComponentIdx = lightVec.size() - 1;
-			}
-			else {
-				--m_activeLightComponentIdx;
-			}
-		}
-
-		if (Input::g_IsKeyPressed[GLFW_KEY_F11] && m_inputSelectors[m_activeLightComponentIdx]) {
-			m_inputSelectors[m_activeLightComponentIdx] = false;
-
-			if (m_activeLightComponentIdx == lightVec.size() - 1) {
-				m_activeLightComponentIdx = 0;
-			}
-			else {
-				++m_activeLightComponentIdx;
-			}
-		}
-
-		glm::vec3 moveOffset{ 0.0 };
-		const float moveSpeed = 2.0 * m_dataContext.m_delta;
-
-		for (const auto& obj : sceneObjects)
+		if (m_inputSelectors.size() != lightVecSize)
 		{
-			for (int i = 0; i < lightVec.size(); ++i)
-			{
-				if ( obj->getObjectName() == "sphere_" + std::to_string(i) && m_inputSelectors[i] )
-				{
-					m_transformation = obj->getTransform();
-					glm::vec3 objectPos = m_transformation->getPosition();
+			m_inputSelectors.resize(lightVecSize, false);
+			m_inputSelectors[m_activeLightComponentIdx] = true;
+		}
+		
+		changeInputObjectWithPress(lightVecSize);
 
-					if (isRotating)
-					{
-						m_dataContext.m_angle += m_dataContext.m_rotationSpeed * m_dataContext.m_delta;
+		for (uint32_t i = 0; i < lightVecSize; ++i)
+		{
+			if (!m_inputSelectors[i]) continue;
 
-						glm::vec3 newPos{};
+			auto &sourceObj = lightVec[i]->getSourceObject();
 
-						newPos.x = m_dataContext.m_radius * cos(m_dataContext.m_angle);
-						newPos.z = m_dataContext.m_radius * sin(m_dataContext.m_angle);
+			if (!sourceObj) continue;
 
-						newPos.y = 10 + 60 * sin(m_dataContext.m_angle);
+			m_transformation = sourceObj->getTransform();
 
-						m_transformation->setPosition(newPos);
-						lightVec[i]->update();
-					}
-					else {
-						if (Input::g_IsKeyHeld[GLFW_KEY_KP_8]) moveOffset.z -= moveSpeed;
-						if (Input::g_IsKeyHeld[GLFW_KEY_KP_2]) moveOffset.z += moveSpeed;
-						if (Input::g_IsKeyHeld[GLFW_KEY_KP_4]) moveOffset.x -= moveSpeed;
-						if (Input::g_IsKeyHeld[GLFW_KEY_KP_6]) moveOffset.x += moveSpeed;
-						if (Input::g_IsKeyHeld[GLFW_KEY_KP_7]) moveOffset.y += moveSpeed;
-						if (Input::g_IsKeyHeld[GLFW_KEY_KP_1]) moveOffset.y -= moveSpeed;
+			m_isRotating ? circularMotion(lightVec[i]) : moveOnPress(lightVec[i]);
 
-						if (glm::length(moveOffset) > 0.0) {
-							glm::vec3 newPos = objectPos + moveOffset;
-							m_transformation->setPosition(newPos);
-							lightVec[i]->update();
-						}
-					}
-
-					break;
-				}
-			}
 		}
 	}
 
@@ -205,6 +153,75 @@ namespace InputComponent
 		m_dataContext.m_delta = 0.016f;
 		m_dataContext.m_angle = 0.0f;
 		m_dataContext.m_radius = 45.0f;
+	}
+
+	void SunInputComponent::circularMotion(std::shared_ptr<LIGHTING::Light>& light)
+	{
+		m_dataContext.m_angle += m_dataContext.m_rotationSpeed * m_dataContext.m_delta;
+
+		glm::vec3 newPos{};
+
+		newPos.x = m_dataContext.m_radius * cos(m_dataContext.m_angle);
+		newPos.z = m_dataContext.m_radius * sin(m_dataContext.m_angle);
+
+		newPos.y = 10 + 60 * sin(m_dataContext.m_angle);
+
+		m_transformation->setPosition(newPos);
+		light->update();
+	}
+
+	void SunInputComponent::moveOnPress(std::shared_ptr<LIGHTING::Light>& light)
+	{
+		glm::vec3 objPosition = m_transformation->getPosition();
+
+		glm::vec3 moveOffset{ 0.0 };
+		const float moveSpeed = 2.0 * m_dataContext.m_delta;
+
+		if (Input::g_IsKeyHeld[GLFW_KEY_KP_8]) moveOffset.z -= moveSpeed;
+		if (Input::g_IsKeyHeld[GLFW_KEY_KP_2]) moveOffset.z += moveSpeed;
+		if (Input::g_IsKeyHeld[GLFW_KEY_KP_4]) moveOffset.x -= moveSpeed;
+		if (Input::g_IsKeyHeld[GLFW_KEY_KP_6]) moveOffset.x += moveSpeed;
+		if (Input::g_IsKeyHeld[GLFW_KEY_KP_7]) moveOffset.y += moveSpeed;
+		if (Input::g_IsKeyHeld[GLFW_KEY_KP_1]) moveOffset.y -= moveSpeed;
+
+		if (glm::length(moveOffset) > 0.0) {
+			glm::vec3 newPos = objPosition + moveOffset;
+			m_transformation->setPosition(newPos);
+			light->update();
+		}
+	}
+
+	void SunInputComponent::changeInputObjectWithPress(uint32_t lightVecSize)
+	{
+		if (Input::g_IsKeyPressed[GLFW_KEY_3] && m_inputSelectors[m_activeLightComponentIdx]) {
+			m_isRotating = !m_isRotating;
+		}
+
+		if (Input::g_IsKeyDown[GLFW_KEY_F10] && m_inputSelectors[m_activeLightComponentIdx]) {
+			m_inputSelectors[m_activeLightComponentIdx] = false;
+
+			if (m_activeLightComponentIdx == 0) {
+				m_activeLightComponentIdx = lightVecSize - 1;
+			}
+			else {
+				--m_activeLightComponentIdx;
+			}
+
+			m_inputSelectors[m_activeLightComponentIdx] = true;
+		}
+
+		if (Input::g_IsKeyDown[GLFW_KEY_F11] && m_inputSelectors[m_activeLightComponentIdx]) {
+			m_inputSelectors[m_activeLightComponentIdx] = false;
+
+			if (m_activeLightComponentIdx == lightVecSize - 1) {
+				m_activeLightComponentIdx = 0;
+			}
+			else {
+				++m_activeLightComponentIdx;
+			}
+
+			m_inputSelectors[m_activeLightComponentIdx] = true;
+		}
 	}
 
 }

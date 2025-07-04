@@ -110,7 +110,7 @@ namespace SCENE
 			lightManager->uploadLights(iShader->getGLShaderProgram());
 
 		iShader->setMaterial(material);
-		iShader->setLights(lightManager->getLights());
+		iShader->setLights(lightManager->getLightsByVec());
 		iShader->setMatrices(model, view, projection, camera->getCameraPosition());
 		
 		texture->bind();

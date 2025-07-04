@@ -47,6 +47,8 @@ file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/assets")
 
 add_library(engine STATIC
 
+	########################################## SOURCE FILES ###########################################
+
 	# core .cpp
 	src/core/Engine.cpp
 	src/core/Window.cpp
@@ -111,7 +113,13 @@ add_library(engine STATIC
 
 	# graphic -> Material
 	src/graphics/Material/MaterialLib.cpp
-	
+
+	# imGui files
+	src/ImGui/ImGuiLayer.cpp
+	src/ImGui/ImGuiScoped.cpp
+
+	########################################## HEADER FILES ###########################################
+
 	# core .hpp
 	include/core/Engine.h
 	include/core/Window.h
@@ -181,9 +189,11 @@ add_library(engine STATIC
 
 	# graphic -> Material
 	include/graphics/Material/MaterialLib.h
-)
 
-include_directories(C:/Users/kaay/Desktop/throwEngine/throwEngine/out/build/vs2022-debug/vcpkg_installed/x64-windows/share/stb)
+	# imGui files
+	include/ImGui/ImGuiLayer.h
+	include/ImGui/ImGuiScoped.h
+)
 
 # Copy materials.json to build directory
 configure_file(
@@ -204,12 +214,16 @@ target_include_directories(engine
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_BINARY_DIR}/engine
+
+	PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/out/build/vs2022-debug/vcpkg_installed/x64-windows/share/stb
 )
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 
 target_link_libraries(engine
 	PUBLIC
@@ -217,6 +231,7 @@ target_link_libraries(engine
 	glad::glad
 	glm::glm
 	nlohmann_json::nlohmann_json
+	imgui::imgui
 )
 
 set_target_properties(engine PROPERTIES 

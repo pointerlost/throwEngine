@@ -3,8 +3,9 @@
 #include "Input/InputContext.h"
 #include <vector>
 
-namespace GLgraphics { class Transformations; }
-namespace SCENE { class Scene; };
+namespace GLgraphics { class Transformations; };
+namespace SCENE		 { class Scene;			  };
+namespace LIGHTING   { class Light;			  };
 
 namespace InputComponent
 {
@@ -81,12 +82,20 @@ namespace InputComponent
 
 		void setUpInputContext() override;
 
+		void circularMotion(std::shared_ptr<LIGHTING::Light>& light);
+
+		void moveOnPress(std::shared_ptr<LIGHTING::Light>& light);
+
+		void changeInputObjectWithPress(uint32_t lightVecSize);
+
 	private:
 		std::shared_ptr<GLgraphics::Transformations> m_transformation;
 		Input::InputContext m_dataContext;
 
 		int m_activeLightComponentIdx = 0;
 		std::vector<bool> m_inputSelectors;
+
+		bool m_isRotating = false;
 	};
 
 }

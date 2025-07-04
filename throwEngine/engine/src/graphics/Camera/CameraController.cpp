@@ -16,8 +16,16 @@ namespace CAMERA
 		setUpDataContext();
 	}
 
-	void CameraInputSystem::processInput()
+	void CameraInputSystem::processInput(GLFWwindow* window)
 	{
+		if (Input::g_IsKeyDown[GLFW_KEY_ESCAPE])
+		{
+			m_lockCamera = !m_lockCamera;
+			glfwSetInputMode(window, GLFW_CURSOR, m_lockCamera ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+		}
+
+		if (m_lockCamera) return;
+
 		dataContext.m_currentTime = glfwGetTime();
 
 		if (Input::g_IsKeyHeld[GLFW_KEY_A]) {

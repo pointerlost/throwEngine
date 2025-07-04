@@ -42,6 +42,9 @@ namespace SCENE
 
 		void update(SCENE::Scene &scene);
 
+		void setID(uint32_t id) { m_objectID = id;   };
+		uint32_t getID() const  { return m_objectID; };
+
 		void addInputComponent(std::shared_ptr<InputComponent::IInputComponent> component);
 
 		void setObjectName(const std::string& name) { this->m_objectName = name; };
@@ -57,5 +60,7 @@ namespace SCENE
 		std::shared_ptr<SHADER::IShader> m_shaderInterface = nullptr;
 		std::string m_objectName;
 		std::string m_materialName;
+
+		uint32_t m_objectID;
 	};
 }

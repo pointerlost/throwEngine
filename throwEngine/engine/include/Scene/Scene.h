@@ -59,6 +59,8 @@ namespace SCENE
 		void AddSceneObjectIntoMap(const std::string& name, const std::shared_ptr<SceneObject> object);
 		std::shared_ptr<SceneObject> getSpesificSceneObjectWithName(const std::string& name);
 
+		uint32_t uniqueObjectIDGenerator();
+
 	private:
 		const std::shared_ptr<GLgraphics::MeshData3D> meshData3D;
 		std::vector<std::shared_ptr<SceneObject>> sceneObjects;
@@ -73,5 +75,7 @@ namespace SCENE
 		SceneObjectFactory* m_sceneObjectFactory = nullptr;
 
 		std::unordered_map<std::string, std::shared_ptr<SceneObject>> sceneObjectsMap;
+
+		uint32_t m_uniqueID;
 	};
 }

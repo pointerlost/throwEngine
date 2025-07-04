@@ -36,29 +36,42 @@
 
 namespace core {
 
+	Engine::~Engine()
+	{
+		m_imGuiLayer->Shutdown();
+	}
+
 	bool Engine::run()
 	{
 		OpenGLSetUpResources();
 
+		auto window = m_window->getGLFWwindow();
+
+		if (!window)
+			Logger::error("[Engine::run] GLFWwindow returning nullptr!");
+
 		// engine life loop
-		while (!glfwWindowShouldClose(window->getGLFWwindow()))
+		while (!glfwWindowShouldClose(window))
 		{
 			OpenGLRenderStuff();
 
-			/* Input and data context ++++ */
-
-			cameraManager->updateCamera();
-
-			cameraInput->processInput();
-
+			cameraInput->processInput(window);
+			
 			Input::update();
 
-			/* Input and data context end! */
-			
+			imGuiBeginFrame();
+
 			rendererManager->draw(scene, cameraManager->getViewMatrix(), cameraManager->getProjectionMatrix());
+
+			m_imGuiLayer->imGuiImplementations();
+
+			imGuiEndFrame();
 
 			glfwRenderEventStuff();
 		}
+
+		// test
+		//cameraManager->updateCamera();
 
 		std::cout << "i hope so!" << "\n";
 		return true;
@@ -80,6 +93,8 @@ namespace core {
 			Logger::error("[Engine::initResources] scene->SetUpResources failed!");
 			return false;
 		}
+
+		m_imGuiLayer->Init(m_window->getGLFWwindow());
 
 		scene->initGrid(renderData);
 
@@ -116,6 +131,9 @@ namespace core {
 			
 			if (!initRender())
 				throw std::runtime_error("initRender failed!");
+
+			if (!initImGui())
+				throw std::runtime_error("initImGui failed!");
 			
 			if (!initScene())
 				throw std::runtime_error("initScene failed!");
@@ -138,18 +156,18 @@ namespace core {
 	bool Engine::initWindow()
 	{
 		// Window Manager
-		window = std::make_unique<Window>();
+		m_window = std::make_unique<Window>();
 		
-		DEBUG_PTR(window);
+		DEBUG_PTR(m_window);
 
-		window->initResources();
+		m_window->initResources();
 
 		return true;
 	}
 
 	bool Engine::initCallBack()
 	{
-		CallBack::initResources(window->getGLFWwindow());
+		CallBack::initResources(m_window->getGLFWwindow());
 		
 		return true;
 	}
@@ -283,6 +301,18 @@ namespace core {
 		return true;
 	}
 
+	bool Engine::initImGui()
+	{
+		m_imGuiLayer = std::make_unique<ENGINE::UI::ImGuiLayer>(renderData, m_window->getGLFWwindow());
+
+		if (!m_imGuiLayer) {
+			Logger::warn("[Engine::initImGui] m_imGuiLayer object is nullptr");
+			return false;
+		}
+
+		return true;
+	}
+
 	bool Engine::initScene()
 	{
 		scene = std::make_shared<SCENE::Scene>(meshData3D, dataInputContext);
@@ -358,6 +388,16 @@ namespace core {
 	{
 		// GLFW stuff
 		glfwPollEvents();
-		glfwSwapBuffers(window->getGLFWwindow());
+		glfwSwapBuffers(m_window->getGLFWwindow());
+	}
+
+	void Engine::imGuiBeginFrame()
+	{
+		m_imGuiLayer->BeginFrame();
+	}
+
+	void Engine::imGuiEndFrame()
+	{
+		m_imGuiLayer->EndFrame();
 	}
 }

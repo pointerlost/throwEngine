@@ -32,6 +32,8 @@ namespace LIGHTING
 
 		void update();
 
+		std::shared_ptr<SCENE::SceneObject>& getSourceObject() { return m_SceneObject; };
+
 		glm::vec3& getLightObjectColor() const { return m_lightData->getLightObjectColor(); };
 
 		void setLightType(LightType type) { m_type = type; };

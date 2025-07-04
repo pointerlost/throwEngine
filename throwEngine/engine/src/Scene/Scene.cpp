@@ -72,7 +72,7 @@ namespace SCENE
         }
 
 		// SUN
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 4; i++)
         {
             std::string name = "sphere_" + std::to_string(i);
             const auto sphere = m_sceneObjectFactory->createSphere(
@@ -80,6 +80,7 @@ namespace SCENE
                 glm::vec3{ 30.0f, 30.0f, 15.0f },
                 lightShader
             );
+			sphere->setID( uniqueObjectIDGenerator() );
             sphere->setObjectName(name);
             sphere->addInputComponent(std::make_shared<InputComponent::SunInputComponent>(
                 sphere->getTransform(), inputContext));
@@ -101,11 +102,11 @@ namespace SCENE
 			// in that case setLightType taking sequential values according to the loop
 			light->setLightType(static_cast<LIGHTING::LightType>(i));
 
-			getLightManager()->addLight(light);
+			getLightManager()->addLightToVec(light);
         }
 
 		// CUBES
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 5; i++)
         {
             std::string name = "cube_" + std::to_string(i);
             const auto cube = m_sceneObjectFactory->createCube(
@@ -113,6 +114,7 @@ namespace SCENE
                 glm::vec3{ 0.0f, 0.0f, i * 7.5f },
                 testShader
             );
+			cube->setID(uniqueObjectIDGenerator());
             cube->setObjectName(name);
             cube->getTransform()->setScale(glm::vec3{ 2.5f, 3.5f, 2.5f });
 
@@ -129,7 +131,8 @@ namespace SCENE
             glm::vec3{ 0.0f, -2.5f, 0.0f },
             testShader
         );
-        floor->setObjectName("floor");
+		floor->setID(uniqueObjectIDGenerator());
+		floor->setObjectName("floor");
         floor->getTransform()->setScale(glm::vec3{ 50.5f, 1.5f, 50.5f });
         AddObjectIntoScene(floor);
 
@@ -257,6 +260,11 @@ namespace SCENE
 		auto it = sceneObjectsMap.find(name);
 
 		return ( it != sceneObjectsMap.end() ) ? it->second : nullptr;
+	}
+
+	uint32_t Scene::uniqueObjectIDGenerator()
+	{
+		return m_uniqueID++;
 	}
 
 

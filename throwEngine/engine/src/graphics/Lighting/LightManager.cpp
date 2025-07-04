@@ -27,8 +27,8 @@ namespace LIGHTING
 
         if (useArray) {
             // Array-style lighting
-            for (size_t i = 0; i < m_lights.size() && i < MAX_LIGHTS; ++i) {
-                const auto& light = m_lights[i];
+            for (size_t i = 0; i < m_lightsVec.size() && i < MAX_LIGHTS; ++i) {
+                const auto& light = m_lightsVec[i];
                 std::string prefix = "lights[" + std::to_string(i) + "]";
 
                 // Position and direction
@@ -76,13 +76,13 @@ namespace LIGHTING
                     : Logger::warn("[LightManager::uploadLights] shader has no type uniform!");
             }
             if (shader->hasUniform("numLights"))
-                shader->setInt("numLights", static_cast<int>(m_lights.size()));
+                shader->setInt("numLights", static_cast<int>(m_lightsVec.size()));
             else
                 Logger::warn("[LightManager::uploadLights] shader has no numLights uniform!");
         }
-        else if (useSingle && !m_lights.empty()) {
+        else if (useSingle && !m_lightsVec.empty()) {
             // Single light fallback (use first light)
-            const auto& light = m_lights[0];
+            const auto& light = m_lightsVec[0];
 
             // Position and direction
             shader->hasUniform("light.position")

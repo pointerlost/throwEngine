@@ -7,6 +7,7 @@
 #include "Shaders/ShaderManager.h"
 #include "Scene/SceneObjectFactory.h"
 #include "graphics/Grid/GridSystem.h"
+#include "ImGui/ImGuiLayer.h"
 
 static float SCR_WIDTH = 1540.f;
 static float SCR_HEIGHT = 860.f;
@@ -59,6 +60,7 @@ namespace core
 	class Engine {
 	public:
 		Engine() = default;
+		~Engine();
 
 		bool run();
 		bool initResources();
@@ -66,7 +68,7 @@ namespace core
 
 	private:
 
-		std::unique_ptr<Window> window;
+		std::unique_ptr<Window> m_window;
 
 		Input::InputContext dataInputContext;
 		
@@ -106,6 +108,8 @@ namespace core
 
 		std::unique_ptr<GRID::GridSystem> m_gridSystem;
 
+		std::unique_ptr<ENGINE::UI::ImGuiLayer> m_imGuiLayer;
+
 		bool initWindow();
 
 		bool initCallBack();
@@ -125,6 +129,8 @@ namespace core
 		bool initTransform();
 
 		bool initRender();
+		
+		bool initImGui();
 
 		bool initScene();
 
@@ -135,6 +141,10 @@ namespace core
 		void OpenGLRenderStuff();
 
 		void glfwRenderEventStuff();
+
+		void imGuiBeginFrame();
+
+		void imGuiEndFrame();
 
 	};
 };
