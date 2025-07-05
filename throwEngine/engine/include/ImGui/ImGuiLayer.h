@@ -1,14 +1,17 @@
 #pragma once
 #include <iostream>
+#include <memory>
+#include <unordered_map>
+#include "ImGui/ImGuiObjectState.h"
 
 
+// forward declarations
 namespace GLgraphics
 {
 	class RenderData;
 }
-
-// forward declarations
 struct GLFWwindow;
+namespace SCENE { class SceneObject; };
 
 namespace ENGINE::UI
 {
@@ -20,9 +23,14 @@ namespace ENGINE::UI
 		void Init(GLFWwindow* window);
 		void BeginFrame();
 
-		void imGuiImplementations();
+		bool imGuiImplementations(std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects);
 
 		void implForLightingPanel();
+		void implForRenderObjects(std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects);
+
+		void objectSelectionPanel(const std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects);
+
+		void setSceneObjectMaterial(std::shared_ptr<SCENE::SceneObject>& sceneObject);
 
 		void generalMenuForPanel();
 
@@ -36,5 +44,11 @@ namespace ENGINE::UI
 
 		bool showDemoWindow = true;
 		bool showAnotherWindow = false;
+
+		bool g_RequestShutdown = false;
+
+		std::unordered_map<std::string, UIObjectState> m_objectUIStates;
+
+		bool m_showObjectListWindow = false;
 	};
 }

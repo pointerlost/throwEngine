@@ -17,7 +17,11 @@ namespace SHADER
 	class Shader;
 };
 
-namespace MATERIAL { class MaterialLibrary; };
+namespace MATERIAL
+{
+	class MaterialLibrary;
+	struct Material;
+};
 
 namespace InputComponent { class IInputComponent; };
 
@@ -34,6 +38,11 @@ namespace SCENE
 		~SceneObject() = default;
 
 		bool validateRenderState(const std::shared_ptr<GLgraphics::RenderData>& renderData);
+
+		void initializeMaterial(const std::shared_ptr<MATERIAL::MaterialLibrary>& library);
+		void setMaterialInstance(std::shared_ptr<MATERIAL::Material> instance);
+		std::shared_ptr<MATERIAL::Material> getMaterialInstance() const { return m_materialInstance; };
+		std::string getMaterialName() const { return m_materialName; };
 
 		void setShaderInterface(const std::shared_ptr<SHADER::IShader>& shader) { m_shaderInterface = shader; };
 		std::shared_ptr<SHADER::IShader> getShaderInterface() const { return m_shaderInterface; };
@@ -61,6 +70,8 @@ namespace SCENE
 		std::string m_objectName;
 		std::string m_materialName;
 
-		uint32_t m_objectID;
+		std::shared_ptr<MATERIAL::Material> m_materialInstance;
+
+		uint32_t m_objectID = -1;
 	};
 }

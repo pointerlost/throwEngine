@@ -24,6 +24,12 @@ namespace SHADER
 	class ShaderManager;
 }
 
+namespace MATERIAL
+{
+	class MaterialLibrary;
+	struct Material;
+}
+
 namespace SCENE
 {
 	// Forward declarations
@@ -37,7 +43,7 @@ namespace SCENE
 
 		void setSceneObjectFactoryPointer(SceneObjectFactory* factory) { m_sceneObjectFactory = factory; };
 
-		bool SetUpResources();
+		bool SetUpResources(const std::shared_ptr<MATERIAL::MaterialLibrary>& library);
 
 		bool initGrid(std::shared_ptr<GLgraphics::RenderData> renderData);
 		void setOwnershipGridSystemToScene(std::unique_ptr<GRID::GridSystem>& gridSystem) { m_gridSystem = std::move(gridSystem); };
@@ -54,7 +60,7 @@ namespace SCENE
 
 		bool checkObjectIsAvailable(const std::string& name);
 
-		std::vector<std::shared_ptr<SceneObject>> getSceneObjectVector() const { return sceneObjects; };
+		std::vector<std::shared_ptr<SceneObject>>& getSceneObjectVector() { return sceneObjects; };
 
 		void AddSceneObjectIntoMap(const std::string& name, const std::shared_ptr<SceneObject> object);
 		std::shared_ptr<SceneObject> getSpesificSceneObjectWithName(const std::string& name);

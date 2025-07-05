@@ -51,7 +51,7 @@ namespace core {
 			Logger::error("[Engine::run] GLFWwindow returning nullptr!");
 
 		// engine life loop
-		while (!glfwWindowShouldClose(window))
+		while (!glfwWindowShouldClose(window) && !m_RequestShutdown)
 		{
 			OpenGLRenderStuff();
 
@@ -59,13 +59,13 @@ namespace core {
 			
 			Input::update();
 
-			imGuiBeginFrame();
+			m_imGuiLayer->BeginFrame();
 
 			rendererManager->draw(scene, cameraManager->getViewMatrix(), cameraManager->getProjectionMatrix());
 
-			m_imGuiLayer->imGuiImplementations();
+			m_RequestShutdown = m_imGuiLayer->imGuiImplementations(scene->getSceneObjectVector());
 
-			imGuiEndFrame();
+			m_imGuiLayer->EndFrame();
 
 			glfwRenderEventStuff();
 		}
@@ -89,7 +89,7 @@ namespace core {
 			return false;
 		}
 
-		if (!scene->SetUpResources()) {
+		if (!scene->SetUpResources(m_MaterialLibraryPtr)) {
 			Logger::error("[Engine::initResources] scene->SetUpResources failed!");
 			return false;
 		}
@@ -389,15 +389,5 @@ namespace core {
 		// GLFW stuff
 		glfwPollEvents();
 		glfwSwapBuffers(m_window->getGLFWwindow());
-	}
-
-	void Engine::imGuiBeginFrame()
-	{
-		m_imGuiLayer->BeginFrame();
-	}
-
-	void Engine::imGuiEndFrame()
-	{
-		m_imGuiLayer->EndFrame();
 	}
 }

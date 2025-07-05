@@ -142,10 +142,8 @@ namespace core
 
 		void glfwRenderEventStuff();
 
-		void imGuiBeginFrame();
-
-		void imGuiEndFrame();
-
+		bool m_RequestShutdown = false;
+		void receiveShutdownRequest();
 	};
 };
 

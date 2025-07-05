@@ -20,8 +20,6 @@
 
 #include "Shaders/ShaderProgram.h"
 
-#include "Shaders/ShaderManager.h"
-
 #include "Scene/SceneObjectFactory.h"
 
 #include "graphics/Grid/GridSystem.h"
@@ -29,6 +27,8 @@
 #include <graphics/GLTransformations/Transformations.h>
 
 #include "graphics/Lighting/LightManager.h"
+
+#include "graphics/Material/MaterialLib.h"
 
 #include "graphics/Camera/Camera.h"
 
@@ -44,7 +44,7 @@ namespace SCENE
 		DEBUG_PTR(meshData3D);
 	}
 
-    bool Scene::SetUpResources()
+    bool Scene::SetUpResources(const std::shared_ptr<MATERIAL::MaterialLibrary>& library)
     {
 		if (!m_sceneObjectFactory) {
 			Logger::error("Scene can't setup m_sceneObjectFactory is nullptr!");
@@ -75,8 +75,9 @@ namespace SCENE
         for (int i = 0; i < 4; i++)
         {
             std::string name = "sphere_" + std::to_string(i);
+
             const auto sphere = m_sceneObjectFactory->createSphere(
-                "gold",
+				"gold",
                 glm::vec3{ 30.0f, 30.0f, 15.0f },
                 lightShader
             );
@@ -84,6 +85,7 @@ namespace SCENE
             sphere->setObjectName(name);
             sphere->addInputComponent(std::make_shared<InputComponent::SunInputComponent>(
                 sphere->getTransform(), inputContext));
+
             AddObjectIntoScene(sphere);
 
 			auto lightData = std::make_shared<LIGHTING::LightData>(sphere->getTransform()->getPosition());
@@ -109,8 +111,9 @@ namespace SCENE
         for (int i = 0; i < 5; i++)
         {
             std::string name = "cube_" + std::to_string(i);
-            const auto cube = m_sceneObjectFactory->createCube(
-                "black plastic",
+
+			const auto cube = m_sceneObjectFactory->createCube(
+				"black plastic",
                 glm::vec3{ 0.0f, 0.0f, i * 7.5f },
                 testShader
             );
@@ -127,7 +130,7 @@ namespace SCENE
 
 		// Floor
         const auto floor = m_sceneObjectFactory->createCube(
-            "gold",
+			"gold",
             glm::vec3{ 0.0f, -2.5f, 0.0f },
             testShader
         );
@@ -135,6 +138,11 @@ namespace SCENE
 		floor->setObjectName("floor");
         floor->getTransform()->setScale(glm::vec3{ 50.5f, 1.5f, 50.5f });
         AddObjectIntoScene(floor);
+
+
+		// copy materials to the sceneobjects
+		for (auto& obj : sceneObjects)
+			obj->initializeMaterial(library);
 
         Logger::info("[Scene] SetUpResources successful!");
         return true;

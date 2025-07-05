@@ -60,11 +60,12 @@ namespace SCENE
 			return false;
 		}
 
-		auto material = renderData->getMaterial()->getMaterialByName(m_materialName);
+		auto& material = m_materialInstance;
 		DEBUG_PTR(material);
 
 		if (!material) {
-			Logger::warn("[WARN] [SceneObject] Material missing! Skipping draw.");
+			Logger::info("[SceneObject] Material missing! Not skipping but assign default material!");
+			material = renderData->getMaterial()->getDefaultMaterial();
 			return false;
 		}
 
@@ -87,6 +88,17 @@ namespace SCENE
 		return true;
 	}
 
+	void SceneObject::initializeMaterial(const std::shared_ptr<MATERIAL::MaterialLibrary>& library)
+	{
+		auto base = library->getMaterialByName(m_materialName);
+		m_materialInstance = std::make_shared<MATERIAL::Material>(*base);
+	}
+
+	void SceneObject::setMaterialInstance(std::shared_ptr<MATERIAL::Material> instance)
+	{
+		m_materialInstance = instance;
+	}
+
 	void SceneObject::draw(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
 	{
 		// check nullptr and other debugging stuff
@@ -100,7 +112,7 @@ namespace SCENE
 		auto& iShader = m_shaderInterface;
 		iShader->setRenderDataObject(renderData);
 		auto lightManager = renderData->getLightManager();
-		auto material = renderData->getMaterial()->getMaterialByName(m_materialName);
+		auto &material = m_materialInstance;
 		auto texture = renderData->getTexture();
 		auto camera = renderData->getCamera();
 

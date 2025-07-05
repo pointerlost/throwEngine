@@ -37,6 +37,9 @@ endif()
 # Set your assets directory (adjust path as needed)
 set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/engine/assets")
 
+# Copy textures directory into build/assets/
+file(COPY "${ASSETS_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/assets")
+
 # Make sure this is before configure_file()
 if(NOT EXISTS "${ASSETS_DIR}/materialJSON/materials.json")
     message(FATAL_ERROR "Materials JSON file not found at: ${ASSETS_DIR}/materialJSON/materials.json")
@@ -117,6 +120,7 @@ add_library(engine STATIC
 	# imGui files
 	src/ImGui/ImGuiLayer.cpp
 	src/ImGui/ImGuiScoped.cpp
+	src/ImGui/ImGuiObjectState.cpp
 
 	########################################## HEADER FILES ###########################################
 
@@ -193,6 +197,7 @@ add_library(engine STATIC
 	# imGui files
 	include/ImGui/ImGuiLayer.h
 	include/ImGui/ImGuiScoped.h
+	include/ImGui/ImGuiObjectState.h
 )
 
 # Copy materials.json to build directory

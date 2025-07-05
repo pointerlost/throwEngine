@@ -29,7 +29,7 @@ namespace InputComponent
 
 	void CubeInputComponent::processInput(SCENE::Scene &scene)
 	{
-		std::vector<std::shared_ptr<SCENE::SceneObject>> sceneObjects = scene.getSceneObjectVector();
+		auto &sceneObjects = scene.getSceneObjectVector();
 
 		for (const auto& obj : sceneObjects) {
 
@@ -107,7 +107,7 @@ namespace InputComponent
 
 	void SunInputComponent::processInput(SCENE::Scene& scene)
 	{
-		std::vector<std::shared_ptr<SCENE::SceneObject>> sceneObjects = scene.getSceneObjectVector();
+		auto &sceneObjects = scene.getSceneObjectVector();
 
 		auto& lightManager = scene.getLightManager();
 

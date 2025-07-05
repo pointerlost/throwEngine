@@ -60,16 +60,24 @@ namespace MATERIAL
                     return defaultVal;
                     };
 
-                mat->m_ambient = parseColor("ambient", glm::vec3(0.1f));
-                mat->m_diffuse = parseColor("diffuse", glm::vec3(0.8f));
-                mat->m_specular = parseColor("specular", glm::vec3(0.5f));
+                mat->m_ambient   = parseColor("ambient", glm::vec3(0.1f));
+                mat->m_diffuse   = parseColor("diffuse", glm::vec3(0.8f));
+                mat->m_specular  = parseColor("specular", glm::vec3(0.5f));
                 mat->m_shininess = m.value("shininess", 32.0f);
 
                 // Load textures with error handling
                 auto loadTexture = [&](const std::string& field) -> std::pair<uint32_t, bool> {
                     if (m.contains(field) && m[field].is_array() && !m[field].empty()) {
                         try {
-                            std::string texPath = m[field][0];
+                            std::string texPath = "assets/" + std::string(m[field][0]);
+                            
+                            if (!std::filesystem::exists(texPath)) {
+                                Logger::error("Texture file NOT FOUND on disk: " + texPath);
+                            }
+                            else {
+                                Logger::info("Texture file FOUND: " + texPath);
+                            }
+
                             uint32_t texID = textureManager->generateTexture(texPath);
                             return { texID, true };
                         }

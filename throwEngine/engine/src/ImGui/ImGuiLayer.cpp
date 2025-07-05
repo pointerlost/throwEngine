@@ -14,6 +14,14 @@
 
 #include "graphics/Lighting/LightManager.h"
 
+#include "Scene/Scene.h"
+
+#include "Scene/SceneObject.h"
+
+#include "Shaders/BasicShader.h"
+
+#include "graphics/Material/MaterialLib.h"
+
 #include "core/Logger.h"
 #include "core/Debug.h"
 #define DEBUG_PTR(ptr) DEBUG::DebugForEngineObjectPointers(ptr)
@@ -45,7 +53,7 @@ namespace ENGINE::UI
 		ImGui::NewFrame();
 	}
 
-	void ImGuiLayer::imGuiImplementations()
+	bool ImGuiLayer::imGuiImplementations(std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects)
 	{
 		//std::string tableTitle = "Panel Categories";
 
@@ -58,7 +66,13 @@ namespace ENGINE::UI
 
 		generalMenuForPanel();
 
+		objectSelectionPanel(sceneObjects);
+
+		implForRenderObjects(sceneObjects);
+		
 		implForLightingPanel();
+
+		return g_RequestShutdown;
 	}
 
 	void ImGuiLayer::implForLightingPanel()
@@ -95,8 +109,88 @@ namespace ENGINE::UI
 			currentLight->setLightType(static_cast<LIGHTING::LightType>(typeInt));
 	}
 
+	void ImGuiLayer::implForRenderObjects(std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects)
+	{
+		for (auto& obj : sceneObjects)
+		{
+			const std::string& name = obj->getObjectName();
+			auto& state = m_objectUIStates[name];
+
+			if (!state.isOpen) continue;
+
+			// Window with close toggle
+			ImGuiScopedWindow objectWindow(name.c_str(), &state.isOpen);
+			if (!objectWindow) continue;
+
+			setSceneObjectMaterial(obj);
+		}
+	}
+
+	void ImGuiLayer::objectSelectionPanel(const std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects)
+	{
+		if (!m_showObjectListWindow) return;
+
+		ImGuiScopedWindow objectList("Scene Objects", &m_showObjectListWindow);
+		if (!objectList) {
+			Logger::warn("[ImGuiLayer::objectSelectionPanel] objectList returning false!");
+			return;
+		}
+
+		for (auto& obj : sceneObjects)
+		{
+			const std::string& objName = obj->getObjectName();
+
+			// Button to open/close UI panel for object
+			if (ImGui::Selectable(objName.c_str()))
+			{
+				// we have unique names for objects so not needing to check
+				auto& state = m_objectUIStates[objName];
+				state.isOpen = true; // open the window for this object
+			}
+		}
+	}
+
+	void ImGuiLayer::setSceneObjectMaterial(std::shared_ptr<SCENE::SceneObject>& sceneObject)
+	{
+		auto object = sceneObject->getShaderInterface();
+		auto material = sceneObject->getMaterialInstance();
+
+		if (!object || !material) {
+			std::cout << "has sikome!\n";
+			return;
+		}
+
+		auto objectType = object->getType();
+
+		if (objectType == SHADER::ShaderType::BASIC)
+		{
+			// ambient
+			ImGui::SliderFloat("Set ambient  R value", &material->m_ambient.x, 0.0, 1.0);
+			ImGui::SliderFloat("Set ambient  G value", &material->m_ambient.y, 0.0, 1.0);
+			ImGui::SliderFloat("Set ambient  B value", &material->m_ambient.z, 0.0, 1.0);
+
+			// diffuse
+			ImGui::SliderFloat("Set diffuse  R value", &material->m_diffuse.x, 0.0, 1.0);
+			ImGui::SliderFloat("Set diffuse  G value", &material->m_diffuse.y, 0.0, 1.0);
+			ImGui::SliderFloat("Set diffuse  B value", &material->m_diffuse.z, 0.0, 1.0);
+
+			// specular
+			ImGui::SliderFloat("Set specular R value", &material->m_specular.x, 0.0, 1.0);
+			ImGui::SliderFloat("Set specular G value", &material->m_specular.y, 0.0, 1.0);
+			ImGui::SliderFloat("Set specular B value", &material->m_specular.z, 0.0, 1.0);
+
+			ImGui::Checkbox("Enable diffuse  texture", &material->m_hasDiffuseTexture);
+			ImGui::Checkbox("Enable specular texture", &material->m_hasSpecularTexture);
+		}
+		else if (objectType == SHADER::ShaderType::LIGHT)
+		{
+		}
+	}
+
 	void ImGuiLayer::generalMenuForPanel()
 	{
+		static bool showNewMenu = false;
+		
 		ImGuiScopedMainMenuBar mainMenuBar;
 
 		if (mainMenuBar)
@@ -105,18 +199,24 @@ namespace ENGINE::UI
 				ImGuiScopedMenu engineMenu("ENGINE GUI");
 				if (engineMenu)
 				{
-					ImGui::MenuItem("New");
-					ImGui::MenuItem("Open");
+					if (ImGui::MenuItem("New"))
+						showNewMenu = true;
+
 					ImGui::MenuItem("Save", "Ctrl+S");
 				}
 			} // engineMenu destructor calls EndMenu here
 
 			{
-				ImGuiScopedMenu otherMenu("OTHER MENU");
-				if (otherMenu)
+				ImGuiScopedMenu sceneObjectsMenu("SCENE");
+				if (sceneObjectsMenu)
 				{
-					ImGui::MenuItem("Settings");
-					ImGui::MenuItem("Exit");
+					// SceneObjects GUI
+					if (ImGui::MenuItem("SceneObjects", nullptr, m_showObjectListWindow))
+						m_showObjectListWindow = !m_showObjectListWindow;
+
+					// Engine Shutdown
+					if (ImGui::MenuItem("Exit"))
+						g_RequestShutdown = true;
 				}
 			}
 		}
