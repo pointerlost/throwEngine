@@ -4,6 +4,8 @@
 
 #include "graphics/Textures/Textures.h"
 
+#include "Config.h"
+
 #include <stdexcept>
 
 #include "core/Logger.h"
@@ -69,8 +71,8 @@ namespace MATERIAL
                 auto loadTexture = [&](const std::string& field) -> std::pair<uint32_t, bool> {
                     if (m.contains(field) && m[field].is_array() && !m[field].empty()) {
                         try {
-                            std::string texPath = "assets/" + std::string(m[field][0]);
-                            
+                            std::string texPath = std::string(ASSETS_DIR) + "/" + m[field][0].get<std::string>();
+
                             if (!std::filesystem::exists(texPath)) {
                                 Logger::error("Texture file NOT FOUND on disk: " + texPath);
                             }
