@@ -165,14 +165,14 @@ namespace ENGINE::UI
 		if (objectType == SHADER::ShaderType::BASIC)
 		{
 			// ambient
-			ImGui::SliderFloat("Set ambient  R value", &material->m_ambient.x, 0.0, 1.0);
-			ImGui::SliderFloat("Set ambient  G value", &material->m_ambient.y, 0.0, 1.0);
-			ImGui::SliderFloat("Set ambient  B value", &material->m_ambient.z, 0.0, 1.0);
+			ImGui::SliderFloat("Set ambient  R value", &material->m_ambient.x,  0.05, 1.0);
+			ImGui::SliderFloat("Set ambient  G value", &material->m_ambient.y,  0.05, 1.0);
+			ImGui::SliderFloat("Set ambient  B value", &material->m_ambient.z,  0.05, 1.0);
 
 			// diffuse
-			ImGui::SliderFloat("Set diffuse  R value", &material->m_diffuse.x, 0.0, 1.0);
-			ImGui::SliderFloat("Set diffuse  G value", &material->m_diffuse.y, 0.0, 1.0);
-			ImGui::SliderFloat("Set diffuse  B value", &material->m_diffuse.z, 0.0, 1.0);
+			ImGui::SliderFloat("Set diffuse  R value", &material->m_diffuse.x,  0.0, 1.0);
+			ImGui::SliderFloat("Set diffuse  G value", &material->m_diffuse.y,  0.0, 1.0);
+			ImGui::SliderFloat("Set diffuse  B value", &material->m_diffuse.z,  0.0, 1.0);
 
 			// specular
 			ImGui::SliderFloat("Set specular R value", &material->m_specular.x, 0.0, 1.0);

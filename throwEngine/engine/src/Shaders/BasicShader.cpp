@@ -38,14 +38,14 @@ namespace SHADER
             const auto& light = lights[i];
             std::string prefix = "lights[" + std::to_string(i) + "]";
 
-            m_glProgram->setVec3(prefix + ".position", light->getPosition());
-            m_glProgram->setVec3(prefix + ".direction", light->getDirection());
-            m_glProgram->setVec3(prefix + ".diffuse", light->getLightDiffuse());
-            m_glProgram->setVec3(prefix + ".specular", light->getLightSpecular());
-            m_glProgram->setFloat(prefix + ".constant", light->getConstant());
-            m_glProgram->setFloat(prefix + ".linear", light->getLinear());
-            m_glProgram->setFloat(prefix + ".quadratic", light->getQuadratic());
-            m_glProgram->setFloat(prefix + ".cutOff", light->getCutOff());
+            m_glProgram->setVec3(prefix + ".position",     light->getPosition());
+            m_glProgram->setVec3(prefix + ".direction",    light->getDirection());
+            m_glProgram->setVec3(prefix + ".diffuse",      light->getLightDiffuse());
+            m_glProgram->setVec3(prefix + ".specular",     light->getLightSpecular());
+            m_glProgram->setFloat(prefix + ".constant",    light->getConstant());
+            m_glProgram->setFloat(prefix + ".linear",      light->getLinear());
+            m_glProgram->setFloat(prefix + ".quadratic",   light->getQuadratic());
+            m_glProgram->setFloat(prefix + ".cutOff",      light->getCutOff());
             m_glProgram->setFloat(prefix + ".outerCutOff", light->getOuterCutOff());
             m_glProgram->setInt(prefix + ".type", static_cast<int>(light->getType()));
         }
@@ -57,24 +57,22 @@ namespace SHADER
     {
         if (!m_glProgram || !mat) return;
 
-        m_glProgram->setVec3("material.ambient", mat->m_ambient);
-        m_glProgram->setVec3("material.diffuse", mat->m_diffuse);
-        m_glProgram->setVec3("material.specular", mat->m_specular);
+        m_glProgram->setVec3("material.ambient",    mat->m_ambient);
+        m_glProgram->setVec3("material.diffuse",    mat->m_diffuse);
+        m_glProgram->setVec3("material.specular",   mat->m_specular);
         m_glProgram->setFloat("material.shininess", mat->m_shininess);
 
-        if (mat->m_hasDiffuseTexture) {
-            m_glProgram->setInt("material.hasDiffuseTexture", 1);
-            glActiveTexture(GL_TEXTURE0);
-            m_glProgram->setInt("diffuseTexture", 0);
+        if (mat->m_hasDiffuseTexture == 1) {
+            m_glProgram->setInt("material.hasDiffuseTexture", mat->m_hasDiffuseTexture);
+            m_glProgram->setInt("diffuseTexture", 0); // texunit
         }
         else {
             m_glProgram->setInt("material.hasDiffuseTexture", 0);
         }
 
-        if (mat->m_hasSpecularTexture) {
-            m_glProgram->setInt("material.hasSpecularTexture", 1);
-            glActiveTexture(GL_TEXTURE1);
-            m_glProgram->setInt("specularTexture", 1);
+        if (mat->m_hasSpecularTexture == 1) {
+            m_glProgram->setInt("material.hasSpecularTexture", mat->m_hasSpecularTexture);
+            m_glProgram->setInt("specularTexture", 1); // texunit
         }
         else {
             m_glProgram->setInt("material.hasSpecularTexture", 0);
@@ -91,6 +89,5 @@ namespace SHADER
         m_glProgram->setUniform("projection", projection);
         m_glProgram->setVec3("viewPos", cameraPos);
     }
-
 
 }

@@ -121,11 +121,11 @@ namespace SCENE
 		if (iShader->getType() != SHADER::ShaderType::LIGHT)
 			lightManager->uploadLights(iShader->getGLShaderProgram());
 
+		texture->bind(material->m_diffuseTextureID, material->m_specularTextureID);
+
 		iShader->setMaterial(material);
 		iShader->setLights(lightManager->getLightsByVec());
 		iShader->setMatrices(model, view, projection, camera->getCameraPosition());
-		
-		texture->bind();
 
 		// draw per object
 		m_mesh->drawMeshObject();

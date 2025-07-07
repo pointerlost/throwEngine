@@ -15,10 +15,10 @@ namespace TEXTURE
 		Textures();
 
 		void createTexture();
-		void loadImage(const std::string& path);
+		bool loadImage(const std::string& path);
 		uint32_t generateTexture(const std::string& filePath);
 		
-		void bind();
+		void bind(uint32_t diffuseTexID, uint32_t specularTexID);
 
 		uint32_t getTexID(int index) const;
 

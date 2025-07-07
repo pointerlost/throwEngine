@@ -51,11 +51,11 @@ namespace SCENE
 			return false;
 		}
 
-        auto testShader = m_shaderManager->getShaderInterface("testShader");
-        if (!testShader) {
-            Logger::warn("[Warning] testShader not found, using fallback");
-            testShader = m_shaderManager->getShaderInterface("default");
-            if (!testShader) {
+        auto basicShader = m_shaderManager->getShaderInterface("basicShader");
+        if (!basicShader) {
+            Logger::warn("[Warning] basicShader not found, using fallback");
+            basicShader = m_shaderManager->getShaderInterface("default");
+            if (!basicShader) {
                 Logger::error("[Error] Fallback shader not found!");
                 return false;
             }
@@ -72,6 +72,8 @@ namespace SCENE
         }
 
 		// SUN
+		// change the lighting below!
+		// already we have different light types, so create like that-> createPointLight, createDirectionalLight
         for (int i = 0; i < 4; i++)
         {
             std::string name = "sphere_" + std::to_string(i);
@@ -115,7 +117,7 @@ namespace SCENE
 			const auto cube = m_sceneObjectFactory->createCube(
 				"black plastic",
                 glm::vec3{ 0.0f, 0.0f, i * 7.5f },
-                testShader
+                basicShader
             );
 			cube->setID(uniqueObjectIDGenerator());
             cube->setObjectName(name);
@@ -132,7 +134,7 @@ namespace SCENE
         const auto floor = m_sceneObjectFactory->createCube(
 			"gold",
             glm::vec3{ 0.0f, -2.5f, 0.0f },
-            testShader
+            basicShader
         );
 		floor->setID(uniqueObjectIDGenerator());
 		floor->setObjectName("floor");
@@ -140,13 +142,19 @@ namespace SCENE
         AddObjectIntoScene(floor);
 
 
-		// copy materials to the sceneobjects
-		for (auto& obj : sceneObjects)
-			obj->initializeMaterial(library);
+		// create your own object-specific materials
+		giveYourOwnMaterialsToObjects(library);
 
         Logger::info("[Scene] SetUpResources successful!");
         return true;
     }
+
+	void Scene::giveYourOwnMaterialsToObjects(const std::shared_ptr<MATERIAL::MaterialLibrary>& library)
+	{
+		// copy materials to the sceneobjects
+		for (auto& obj : sceneObjects)
+			obj->initializeMaterial(library);
+	}
 
 	bool Scene::initGrid(std::shared_ptr<GLgraphics::RenderData> renderData)
 	{
@@ -175,9 +183,6 @@ namespace SCENE
 
 	void Scene::drawAllObjects(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
 	{
-		//std::cout << "sceneobject size: " << sceneObjects.size() << "\n";
-		DEBUG_PTR(renderData);
-
 		if (auto gridRenderer = renderData->getGridRenderer()) {
 			if (auto shader = gridRenderer->getGridShader()) {
 				auto shaderProgram = shader->getGLShaderProgram();

@@ -7,7 +7,7 @@
 #include <nlohmann/json.hpp>
 
 // Forward declaration
-
+using json = nlohmann::json;
 namespace TEXTURE { class Textures; };
 
 namespace MATERIAL
@@ -39,6 +39,13 @@ namespace MATERIAL
 
 		bool loadMaterialFromJSON(const std::string& filePath, const std::shared_ptr<TEXTURE::Textures>& textureManager);
 		bool addMaterial(const std::shared_ptr<Material>& material);
+
+		std::pair<uint32_t, bool> loadTextureField(const json& j, const std::string& field, const std::shared_ptr<TEXTURE::Textures>& texManager);
+
+		std::shared_ptr<Material> createMaterial(const json& j, const std::shared_ptr<TEXTURE::Textures>& textureManager);
+
+		json parseJSONfile(const std::string& filePath);
+		glm::vec3 parseColor(const json& j, const std::string& field, const glm::vec3& fallback);
 
 		std::shared_ptr<Material> getDefaultMaterial() { return m_defaultMaterial; };
 

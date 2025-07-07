@@ -45,6 +45,8 @@ namespace SCENE
 
 		bool SetUpResources(const std::shared_ptr<MATERIAL::MaterialLibrary>& library);
 
+		void giveYourOwnMaterialsToObjects(const std::shared_ptr<MATERIAL::MaterialLibrary>& library);
+
 		bool initGrid(std::shared_ptr<GLgraphics::RenderData> renderData);
 		void setOwnershipGridSystemToScene(std::unique_ptr<GRID::GridSystem>& gridSystem) { m_gridSystem = std::move(gridSystem); };
 

@@ -12,8 +12,6 @@
 #include "core/Debug.h"
 #define DEBUG_PTR(ptr) DEBUG::DebugForEngineObjectPointers(ptr)
 
-using json = nlohmann::json;
-
 static auto& file = core::File::get();
 
 namespace MATERIAL
@@ -21,90 +19,20 @@ namespace MATERIAL
 
 	bool MaterialLibrary::loadMaterialFromJSON(const std::string& filePath, const std::shared_ptr<TEXTURE::Textures>& textureManager)
     {
-        std::string content = file.readFromFile(filePath);
-        if (content.empty()) {
-            Logger::error("MaterialLibrary: Empty or missing file: " + filePath);
-            return false;
-        }
-
-        json j;
-        try {
-            j = json::parse(content);
-        }
-        catch (const json::parse_error& e) {
-            Logger::error("MaterialLibrary: JSON parse error in " + filePath + ": " + e.what());
-            return false;
-        }
-
+        json j = parseJSONfile(filePath);
         if (!j.contains("materials") || !j["materials"].is_array()) {
-            Logger::error("MaterialLibrary: Invalid JSON format in " + filePath);
+            Logger::error("The file format is incorrect.");
             return false;
         }
 
-        // Clear existing materials
         m_materials.clear();
         m_nameToIndex.clear();
-
-        // Create default material first
         createDefaultMaterials();
 
-        // Load materials
-        for (const auto& m : j["materials"]) {
-            try {
-                auto mat = std::make_shared<Material>();
-                mat->m_name = m.value("name", "unnamed_" + std::to_string(m_materials.size()));
-
-                // Parse color values with safety checks
-                auto parseColor = [&](const std::string& field, glm::vec3 defaultVal) {
-                    if (m.contains(field) && m[field].is_array() && m[field].size() == 3) {
-                        return glm::vec3(m[field][0], m[field][1], m[field][2]);
-                    }
-                    return defaultVal;
-                    };
-
-                mat->m_ambient   = parseColor("ambient", glm::vec3(0.1f));
-                mat->m_diffuse   = parseColor("diffuse", glm::vec3(0.8f));
-                mat->m_specular  = parseColor("specular", glm::vec3(0.5f));
-                mat->m_shininess = m.value("shininess", 32.0f);
-
-                // Load textures with error handling
-                auto loadTexture = [&](const std::string& field) -> std::pair<uint32_t, bool> {
-                    if (m.contains(field) && m[field].is_array() && !m[field].empty()) {
-                        try {
-                            std::string texPath = std::string(ASSETS_DIR) + "/" + m[field][0].get<std::string>();
-
-                            if (!std::filesystem::exists(texPath)) {
-                                Logger::error("Texture file NOT FOUND on disk: " + texPath);
-                            }
-                            else {
-                                Logger::info("Texture file FOUND: " + texPath);
-                            }
-
-                            uint32_t texID = textureManager->generateTexture(texPath);
-                            return { texID, true };
-                        }
-                        catch (...) {
-                            Logger::warn("Failed to load texture for material " + mat->m_name);
-                        }
-                    }
-                    return { 0, false };
-                    };
-
-                auto [diffuseID, hasDiffuse] = loadTexture("diffuseTexture");
-                mat->m_diffuseTextureID = diffuseID;
-                mat->m_hasDiffuseTexture = hasDiffuse;
-
-                auto [specularID, hasSpecular] = loadTexture("specularTexture");
-                mat->m_specularTextureID = specularID;
-                mat->m_hasSpecularTexture = hasSpecular;
-
-                if (!addMaterial(mat)) {
-                    Logger::warn("Duplicate material name: " + mat->m_name);
-                }
-            }
-            catch (const std::exception& e) {
-                Logger::error("Error loading material: " + std::string(e.what()));
-                continue; // Skip this material but continue loading others
+        for (const auto& item : j["materials"]) {
+            auto mat = createMaterial(item, textureManager);
+            if (!addMaterial(mat)) {
+                Logger::warn("Material with the same name already exists: " + mat->m_name);
             }
         }
 
@@ -120,6 +48,63 @@ namespace MATERIAL
 		m_materials.push_back(material);
 		return true;
 	}
+
+    std::pair<uint32_t, bool> MaterialLibrary::loadTextureField(const json& j, const std::string& field, const std::shared_ptr<TEXTURE::Textures>& texManager)
+    {
+        if (j.contains(field) && j[field].is_array() && !j[field].empty()) {
+            std::string path = std::string(ASSETS_DIR) + "/" + j[field][0].get<std::string>();
+            if (!std::filesystem::exists(path))
+                Logger::error("Texture file NOT FOUND" + path);
+            else {
+                Logger::info("Texture file FOUND" + path);
+                return { texManager->generateTexture(path), true };
+            }
+        }
+        return { 0, false };
+    }
+
+    std::shared_ptr<MATERIAL::Material> MaterialLibrary::createMaterial(const json& data, const std::shared_ptr<TEXTURE::Textures>& textureManager)
+    {
+        auto mat = std::make_shared<MATERIAL::Material>();
+        mat->m_name = data.value("name", "unnamed");
+
+        mat->m_ambient   = parseColor(data, "ambient",  glm::vec3(0.1f));
+        mat->m_diffuse   = parseColor(data, "diffuse",  glm::vec3(0.8f));
+        mat->m_specular  = parseColor(data, "specular", glm::vec3(0.5f));
+        mat->m_shininess = data.value("shininess", 32.0f);
+
+        // load diffuse texture when object has a texture
+        std::tie(mat->m_diffuseTextureID,  mat->m_hasDiffuseTexture)  = loadTextureField(data, "diffuseTexture", textureManager);
+
+        // load specular texture when object has a texture
+        std::tie(mat->m_specularTextureID, mat->m_hasSpecularTexture) = loadTextureField(data, "specularTexture", textureManager);
+
+        return mat;
+    }
+
+    json MaterialLibrary::parseJSONfile(const std::string& filePath)
+    {
+        std::string content = file.readFromFile(filePath);
+        if (content.empty()) {
+            Logger::error("MaterialLibrary: empty or missing file: " + filePath);
+            return {};
+        }
+
+        try {
+            return json::parse(content);
+        }
+        catch (const json::parse_error& e) {
+            Logger::error("MaterialLibrary: JSON parse error in " + filePath + ": " + e.what());
+            return {};
+        }
+    }
+
+    glm::vec3 MaterialLibrary::parseColor(const json& j, const std::string& field, const glm::vec3& fallback)
+    {
+        if (j.contains(field) && j[field].is_array() && j[field].size() == 3)
+            return glm::vec3(j[field][0], j[field][1], j[field][2]);
+        return fallback;
+    }
 
 	std::shared_ptr<Material> MaterialLibrary::getMaterialByName(const std::string& name)
 	{
