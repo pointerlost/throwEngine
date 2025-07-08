@@ -8,5 +8,7 @@ namespace ENGINE::UI
 	{
 		bool isOpen = false;
 		bool isSelected = false;
+		bool isMaterialOpen = false;
+		bool isTransformOpen = false;
 	};
 }

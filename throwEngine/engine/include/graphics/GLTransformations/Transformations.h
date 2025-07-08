@@ -22,6 +22,11 @@ namespace GLgraphics
 
 		void setPosition(const glm::vec3& pos);
 		void setRotation(float angleInDegrees, const glm::vec3& axis);
+		glm::vec3 getRotationAxis() const { return rotationAxis; };
+
+		void setRotationAngle(float angleInDegrees) { rotationAngle = angleInDegrees; };
+		float getRotationAngle() const { return rotationAngle; };
+
 		void setScale(const glm::vec3& scaleVec);
 
 		void addRotation(float angleInDegrees, const glm::vec3& axis);

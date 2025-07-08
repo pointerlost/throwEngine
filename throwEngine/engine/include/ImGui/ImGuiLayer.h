@@ -10,6 +10,7 @@ namespace GLgraphics
 {
 	class RenderData;
 }
+struct ImGuiIO;
 struct GLFWwindow;
 namespace SCENE { class SceneObject; };
 
@@ -23,6 +24,8 @@ namespace ENGINE::UI
 		void Init(GLFWwindow* window);
 		void BeginFrame();
 
+		void initFont(ImGuiIO& io);
+
 		bool imGuiImplementations(std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects);
 
 		void implForLightingPanel();
@@ -30,7 +33,13 @@ namespace ENGINE::UI
 
 		void objectSelectionPanel(const std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects);
 
+		void showMaterialProperties(std::shared_ptr<SCENE::SceneObject>& object, UIObjectState& state);
+		void showTransformProperties(std::shared_ptr<SCENE::SceneObject>& object, UIObjectState& state);
+
+		void showSelectedObjectProperties(std::shared_ptr<SCENE::SceneObject>& object);
+
 		void setSceneObjectMaterial(std::shared_ptr<SCENE::SceneObject>& sceneObject);
+		void setSceneObjectTransform(std::shared_ptr<SCENE::SceneObject>& sceneObject);
 
 		void generalMenuForPanel();
 
@@ -50,5 +59,7 @@ namespace ENGINE::UI
 		std::unordered_map<std::string, UIObjectState> m_objectUIStates;
 
 		bool m_showObjectListWindow = false;
+
+		std::string m_fontPath;
 	};
 }

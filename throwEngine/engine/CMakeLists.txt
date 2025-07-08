@@ -5,6 +5,9 @@ project(engine)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+set(VCPKG_MANIFEST_MODE ON)
+
 # Detect vcpkg root directory from environment variable VCPKG_ROOT
 if(DEFINED ENV{VCPKG_ROOT})
     set(VCPKG_ROOT $ENV{VCPKG_ROOT})

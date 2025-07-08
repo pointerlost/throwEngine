@@ -1,19 +1,12 @@
 #pragma once
 #include <iostream>
-
-// forward declarations
-namespace ImGui
-{
-	void End();
-	void EndTable();
-	void EndMenu();
-	void EndMenuBar();
-};
-typedef int ImGuiWindowFlags;
-struct GLFWwindow;
+#include <imgui.h>
 
 namespace ENGINE::UI
 {
+										/* SCOPE is a RAII wrapper */
+	
+	// These structures are scoped wrappers for ImGui functionality.
 
 	struct ImGuiScopedWindow
 	{
@@ -67,5 +60,42 @@ namespace ENGINE::UI
 		~ImGuiScopedMenu();
 
 		operator bool() const { return m_open; };
+	};
+
+	/* *********************************** SCOPED MENU ************************************ */
+
+	struct ImGuiScopedPopupMenu
+	{
+	private:
+		bool m_open;
+
+	public:
+		ImGuiScopedPopupMenu(const char* label, bool enabled = true);
+		~ImGuiScopedPopupMenu();
+
+		operator bool() const { return m_open; };
+	};
+
+	/* *********************************** SCOPED CHILD ************************************ */
+
+	struct ImGuiScopedChild
+	{
+	private:
+		bool m_open;
+
+	public:
+		ImGuiScopedChild(const char* label, ImVec2 size = {150,100}, ImGuiChildFlags flags = ImGuiChildFlags_None);
+		~ImGuiScopedChild();
+
+		operator bool() const { return m_open; };
+	};
+
+	/* *********************************** SCOPED CHILD ************************************ */
+
+	struct ImGuiScopedStyleVar
+	{
+	public:
+		ImGuiScopedStyleVar(ImGuiStyleVar var, ImVec2 fontSize = { 12,9 });
+		~ImGuiScopedStyleVar();
 	};
 }

@@ -2,8 +2,6 @@
 
 #include "ImGui/ImGuiScoped.h"
 
-#include "imgui.h"
-
 #include "imgui_impl_glfw.h"
 
 #include "imgui_impl_opengl3.h"
@@ -14,6 +12,8 @@
 
 #include "graphics/Lighting/LightManager.h"
 
+#include <graphics/GLTransformations/Transformations.h>
+
 #include "Scene/Scene.h"
 
 #include "Scene/SceneObject.h"
@@ -21,6 +21,10 @@
 #include "Shaders/BasicShader.h"
 
 #include "graphics/Material/MaterialLib.h"
+
+#include <Config.h>
+
+#include <core/File.h>
 
 #include "core/Logger.h"
 #include "core/Debug.h"
@@ -42,6 +46,9 @@ namespace ENGINE::UI
 
 		ImGui::StyleColorsClassic();
 
+		// set the ImGui font style and text size
+		initFont(io);
+
 		ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
 		ImGui_ImplOpenGL3_Init("#version 440");	// according to shader version
 	}
@@ -51,6 +58,21 @@ namespace ENGINE::UI
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+	}
+
+	void ImGuiLayer::initFont(ImGuiIO& io)
+	{
+		auto& file = core::File::get();
+
+		m_fontPath = std::string(ASSETS_DIR) + "/fonts/Roboto-Italic.ttf";
+
+		if (file.exists(m_fontPath)) {
+			io.Fonts->AddFontFromFileTTF(m_fontPath.c_str(), 20.0f);
+		}
+		else {
+			Logger::error("[ImGuiLayer::Init::initFont] Font file not found at path! so Default path assigned!");
+			io.Fonts->AddFontDefault();
+		}
 	}
 
 	bool ImGuiLayer::imGuiImplementations(std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects)
@@ -118,11 +140,14 @@ namespace ENGINE::UI
 
 			if (!state.isOpen) continue;
 
-			// Window with close toggle
-			ImGuiScopedWindow objectWindow(name.c_str(), &state.isOpen);
-			if (!objectWindow) continue;
+			ImGui::SetNextWindowSize(ImVec2(400, 300));
 
-			setSceneObjectMaterial(obj);
+			// Window with close toggle
+			ImGuiScopedWindow objectWindow((name + std::string(" | Object Properties")).c_str(), &state.isOpen);
+			if (objectWindow)
+			{
+				showSelectedObjectProperties(obj);
+			}
 		}
 	}
 
@@ -130,6 +155,11 @@ namespace ENGINE::UI
 	{
 		if (!m_showObjectListWindow) return;
 
+		uint32_t objectsSize = sceneObjects.size();
+
+		ImGui::SetNextWindowSize(ImVec2(objectsSize * 20, objectsSize * 20), ImGuiCond_Once);
+
+		// ImGuiScopedWindow is a RAII wrapper for ImGui::Begin() and ImGui::End()
 		ImGuiScopedWindow objectList("Scene Objects", &m_showObjectListWindow);
 		if (!objectList) {
 			Logger::warn("[ImGuiLayer::objectSelectionPanel] objectList returning false!");
@@ -138,16 +168,59 @@ namespace ENGINE::UI
 
 		for (auto& obj : sceneObjects)
 		{
-			const std::string& objName = obj->getObjectName();
+			const std::string name = obj->getObjectName();
+			auto& state = m_objectUIStates[name];
 
-			// Button to open/close UI panel for object
-			if (ImGui::Selectable(objName.c_str()))
+			if (ImGui::Selectable(name.c_str()))
 			{
-				// we have unique names for objects so not needing to check
-				auto& state = m_objectUIStates[objName];
-				state.isOpen = true; // open the window for this object
+				state.isOpen = !state.isOpen;
 			}
 		}
+
+	}
+
+	void ImGuiLayer::showTransformProperties(std::shared_ptr<SCENE::SceneObject>& object, UIObjectState& state)
+	{
+		ImGuiScopedMenu transformProperties("TRANSFORMATIONS");
+		if (!transformProperties) return;
+
+		if (ImGui::IsItemHovered())
+		{
+			state.isTransformOpen = !state.isTransformOpen;
+		}
+
+		if (state.isTransformOpen)
+		{
+			setSceneObjectTransform(object);
+		}
+	}
+
+	void ImGuiLayer::showMaterialProperties(std::shared_ptr<SCENE::SceneObject>& object, UIObjectState& state)
+	{
+		ImGuiScopedMenu materialProperties("MATERIAL");
+		if (!materialProperties) return;
+
+		if (ImGui::IsItemHovered())
+		{
+			state.isMaterialOpen = true;
+		}
+
+		if (state.isMaterialOpen)
+		{
+			setSceneObjectMaterial(object);
+		}
+	}
+
+	void ImGuiLayer::showSelectedObjectProperties(std::shared_ptr<SCENE::SceneObject>& object)
+	{
+		auto& state = m_objectUIStates[object->getObjectName()];
+
+		// push style variables to change padding
+		ImGuiScopedStyleVar stylePadding(ImGuiStyleVar_FramePadding, ImVec2(15, 12));
+
+		showMaterialProperties(object, state);
+
+		showTransformProperties(object, state);
 	}
 
 	void ImGuiLayer::setSceneObjectMaterial(std::shared_ptr<SCENE::SceneObject>& sceneObject)
@@ -169,22 +242,59 @@ namespace ENGINE::UI
 			ImGui::SliderFloat("Set ambient  G value", &material->m_ambient.y,  0.05, 1.0);
 			ImGui::SliderFloat("Set ambient  B value", &material->m_ambient.z,  0.05, 1.0);
 
+			ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
+
 			// diffuse
 			ImGui::SliderFloat("Set diffuse  R value", &material->m_diffuse.x,  0.0, 1.0);
 			ImGui::SliderFloat("Set diffuse  G value", &material->m_diffuse.y,  0.0, 1.0);
 			ImGui::SliderFloat("Set diffuse  B value", &material->m_diffuse.z,  0.0, 1.0);
+
+			ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
 
 			// specular
 			ImGui::SliderFloat("Set specular R value", &material->m_specular.x, 0.0, 1.0);
 			ImGui::SliderFloat("Set specular G value", &material->m_specular.y, 0.0, 1.0);
 			ImGui::SliderFloat("Set specular B value", &material->m_specular.z, 0.0, 1.0);
 
+			ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
+
 			ImGui::Checkbox("Enable diffuse  texture", &material->m_hasDiffuseTexture);
 			ImGui::Checkbox("Enable specular texture", &material->m_hasSpecularTexture);
 		}
-		else if (objectType == SHADER::ShaderType::LIGHT)
+		/*else if (objectType == SHADER::ShaderType::LIGHT)
 		{
+		}*/
+	}
+
+	void ImGuiLayer::setSceneObjectTransform(std::shared_ptr<SCENE::SceneObject>& sceneObject)
+	{
+		auto transform = sceneObject->getTransform();
+		if (!transform) {
+			Logger::error("[ImGuiLayer::setSceneObjectTransform] Transform is nullptr!");
+			return;
 		}
+
+		auto position = transform->getPosition();
+		auto rotation = transform->getRotationAxis();
+		auto angle    = transform->getRotationAngle();
+
+		ImGui::SliderFloat("Set object x-Axis position", &position.x, -360.0, 360.0);
+		ImGui::SliderFloat("Set object y-Axis position", &position.y, -360.0, 360.0);
+		ImGui::SliderFloat("Set object z-Axis position", &position.z, -360.0, 360.0);
+
+		ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
+
+		ImGui::SliderFloat("Set rotation angle of object", &angle, -360.0f, 360.0f);
+
+		ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
+
+		ImGui::SliderFloat3("Rotate around x-Axis", &rotation.x, -360.0, 360.0);
+		ImGui::SliderFloat3("Rotate around y-Axis", &rotation.y, -360.0, 360.0);
+		ImGui::SliderFloat3("Rotate around z-Axis", &rotation.z, -360.0, 360.0);
+
+		transform->setRotationAngle(angle);
+		transform->setPosition(position);
+		transform->setRotation(angle, rotation);
 	}
 
 	void ImGuiLayer::generalMenuForPanel()

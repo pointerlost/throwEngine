@@ -1,7 +1,5 @@
 #include "ImGui/ImGuiScoped.h"
 
-#include "imgui.h"
-
 #include "imgui_impl_glfw.h"
 
 #include "imgui_impl_opengl3.h"
@@ -51,7 +49,9 @@ namespace ENGINE::UI
 
 
 	ImGuiScopedMenu::ImGuiScopedMenu(const char* label, bool enabled)
-		: m_open(ImGui::BeginMenu(label, enabled)) {
+		: m_open(ImGui::BeginMenu(label, enabled))
+	{
+
 	}
 
 	ImGuiScopedMenu::~ImGuiScopedMenu()
@@ -59,4 +59,42 @@ namespace ENGINE::UI
 		if (m_open)
 			ImGui::EndMenu();
 	}
+
+	/* *********************************** SCOPED POPUP MENU ************************************ */
+
+
+	ImGuiScopedPopupMenu::ImGuiScopedPopupMenu(const char* label, bool enabled)
+		:m_open(ImGui::BeginPopup(label, enabled)) {}
+
+	ImGuiScopedPopupMenu::~ImGuiScopedPopupMenu()
+	{
+		if (m_open)
+			ImGui::EndPopup();
+	}
+
+	/* *********************************** SCOPED POPUP MENU ************************************ */
+
+
+	ImGuiScopedChild::ImGuiScopedChild(const char* label, ImVec2 size, ImGuiChildFlags flags)
+		:m_open(ImGui::BeginChild(label, ImVec2(100, 50), flags)) {}
+
+	ImGuiScopedChild::~ImGuiScopedChild()
+	{
+		if (m_open)
+			ImGui::EndChild();
+	}
+
+	/* *********************************** SCOPED POPUP MENU ************************************ */
+
+
+	ImGuiScopedStyleVar::ImGuiScopedStyleVar(ImGuiStyleVar var, ImVec2 fontSize)
+	{
+		ImGui::PushStyleVar(var, fontSize);
+	}
+
+	ImGuiScopedStyleVar::~ImGuiScopedStyleVar()
+	{
+		ImGui::PopStyleVar();
+	}
+
 }
