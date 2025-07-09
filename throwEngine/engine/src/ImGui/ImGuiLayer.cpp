@@ -127,8 +127,10 @@ namespace ENGINE::UI
 		int typeInt = static_cast<int>(currentType);
 
 		// set light type
-		if (ImGui::SliderInt("SetLightType", &typeInt, 0, 3))
+		if (ImGui::SliderInt("SetLightType", &typeInt, 0, 2)) // 0 = Directional, 1 = Point, 2 = Spot
 			currentLight->setLightType(static_cast<LIGHTING::LightType>(typeInt));
+
+		currentLight->update();
 	}
 
 	void ImGuiLayer::implForRenderObjects(std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects)
@@ -249,6 +251,10 @@ namespace ENGINE::UI
 			ImGui::SliderFloat("Set diffuse  G value", &material->m_diffuse.y,  0.0, 1.0);
 			ImGui::SliderFloat("Set diffuse  B value", &material->m_diffuse.z,  0.0, 1.0);
 
+			// set diffuse color using color picker
+			ImGui::ColorEdit3("Set diffuse color", glm::value_ptr(material->m_diffuse),
+				ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+
 			ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
 
 			// specular
@@ -268,33 +274,41 @@ namespace ENGINE::UI
 
 	void ImGuiLayer::setSceneObjectTransform(std::shared_ptr<SCENE::SceneObject>& sceneObject)
 	{
-		auto transform = sceneObject->getTransform();
+		ImGui::PushID(sceneObject->getObjectName().c_str()); // Push a unique ID for the object
+
+		auto &transform = sceneObject->getTransform();
 		if (!transform) {
 			Logger::error("[ImGuiLayer::setSceneObjectTransform] Transform is nullptr!");
 			return;
 		}
 
 		auto position = transform->getPosition();
-		auto rotation = transform->getRotationAxis();
-		auto angle    = transform->getRotationAngle();
+		auto angles   = transform->getEulerAngles();
+		auto scale	  = transform->getScale();
 
-		ImGui::SliderFloat("Set object x-Axis position", &position.x, -360.0, 360.0);
-		ImGui::SliderFloat("Set object y-Axis position", &position.y, -360.0, 360.0);
-		ImGui::SliderFloat("Set object z-Axis position", &position.z, -360.0, 360.0);
+		ImGui::Text("Position");
+		ImGui::SliderFloat("X##Position", &position.x, -100.0, 100.0);
+		ImGui::SliderFloat("Y##Position", &position.y, -100.0, 100.0);
+		ImGui::SliderFloat("Z##Position", &position.z, -100.0, 100.0);
 
-		ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
+		ImGui::Separator();
+		
+		ImGui::Text("Rotation (Euler Angles):");
+		ImGui::SliderFloat("X##Euler", &angles.x, -180.0, 180.0);
+		ImGui::SliderFloat("Y##Euler", &angles.y, -180.0, 180.0);
+		ImGui::SliderFloat("Z##Euler", &angles.z, -180.0, 180.0);
 
-		ImGui::SliderFloat("Set rotation angle of object", &angle, -360.0f, 360.0f);
+		ImGui::Separator();
 
-		ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
+		ImGui::Text("Scale");
+		ImGui::SliderFloat("X##Scale", &scale.x, 0.01, 10.0);
+		ImGui::SliderFloat("Y##Scale", &scale.y, 0.01, 10.0);
+		ImGui::SliderFloat("Z##Scale", &scale.z, 0.01, 10.0);
 
-		ImGui::SliderFloat3("Rotate around x-Axis", &rotation.x, -360.0, 360.0);
-		ImGui::SliderFloat3("Rotate around y-Axis", &rotation.y, -360.0, 360.0);
-		ImGui::SliderFloat3("Rotate around z-Axis", &rotation.z, -360.0, 360.0);
+		// Update the transform with the new values
+		transform->updateAll(angles, position, scale);
 
-		transform->setRotationAngle(angle);
-		transform->setPosition(position);
-		transform->setRotation(angle, rotation);
+		ImGui::PopID(); // Pop the ID to avoid conflicts with other objects
 	}
 
 	void ImGuiLayer::generalMenuForPanel()

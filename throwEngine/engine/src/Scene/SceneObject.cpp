@@ -106,7 +106,7 @@ namespace SCENE
 			Logger::error("[ERROR] [SceneObject::draw] validateRenderState pointer initialization failed!");
 			return;
 		}
-		
+
 		const glm::mat4 model = m_transform->getModelMatrix();
 
 		auto& iShader = m_shaderInterface;

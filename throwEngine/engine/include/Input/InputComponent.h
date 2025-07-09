@@ -21,6 +21,8 @@ namespace InputComponent
 		virtual void processInput(SCENE::Scene& scene) = 0;
 
 		virtual void setUpInputContext() = 0;
+
+		virtual void changeInputObjectWithPress(uint32_t lightVecSize) = 0;
 	};
 
 
@@ -41,6 +43,29 @@ namespace InputComponent
 		void processInput(SCENE::Scene& scene) override;
 	};*/
 
+	class SphereInputComponent : public IInputComponent
+	{
+	public:
+		SphereInputComponent(std::shared_ptr<GLgraphics::Transformations> transform, Input::InputContext context);
+		~SphereInputComponent() = default;
+
+		void processInput(SCENE::Scene& scene) override;
+
+		void setUpInputContext() override;
+
+		void changeInputObjectWithPress(uint32_t lightVecSize) override;
+
+	private:
+		std::shared_ptr<GLgraphics::Transformations> m_transformation;
+		Input::InputContext m_dataContext;
+
+		int m_activeLightComponentIdx = 0;
+		std::vector<bool> m_inputSelectors;
+
+		bool m_isRotating = false;
+	};
+
+
 	class CubeInputComponent : public IInputComponent
 	{
 	public:
@@ -50,6 +75,8 @@ namespace InputComponent
 		void processInput(SCENE::Scene& scene) override;
 
 		void setUpInputContext() override;
+
+		void changeInputObjectWithPress(uint32_t lightVecSize) = 0;
 
 	private:
 		std::shared_ptr<GLgraphics::Transformations> m_transformation;
@@ -67,16 +94,18 @@ namespace InputComponent
 
 		void setUpInputContext() override;
 
+		void changeInputObjectWithPress(uint32_t lightVecSize) = 0;
+
 	private:
 		std::shared_ptr<GLgraphics::Transformations> m_transformation;
 		Input::InputContext m_dataContext;
 	};
 
 
-	class SunInputComponent : public IInputComponent
+	class LightInputComponent : public IInputComponent
 	{
 	public:
-		SunInputComponent(std::shared_ptr<GLgraphics::Transformations> transform, Input::InputContext context);
+		LightInputComponent(std::shared_ptr<GLgraphics::Transformations> transform, Input::InputContext context);
 
 		void processInput(SCENE::Scene& scene) override;
 
@@ -86,7 +115,7 @@ namespace InputComponent
 
 		void moveOnPress(std::shared_ptr<LIGHTING::Light>& light);
 
-		void changeInputObjectWithPress(uint32_t lightVecSize);
+		void changeInputObjectWithPress(uint32_t lightVecSize) override;
 
 	private:
 		std::shared_ptr<GLgraphics::Transformations> m_transformation;

@@ -28,8 +28,14 @@ namespace LIGHTING
 
 		void uploadLights(const std::shared_ptr<SHADER::GLShaderProgram>& shader) const;
 
+		void addLightToMap(const std::shared_ptr<Light>& light);
+		std::shared_ptr<Light> getLightWithSceneObjectID(uint32_t sceneObjectID) const;
+
 	private:
 		std::vector<std::shared_ptr<Light>> m_lightsVec;
-		static constexpr int MAX_LIGHTS = 4;
+
+		std::unordered_map<uint32_t, std::shared_ptr<Light>> m_mapGetLightWithSceneObjectID;
+
+		static constexpr int MAX_LIGHTS = 6;
 	};
 }

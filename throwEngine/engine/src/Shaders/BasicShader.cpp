@@ -8,6 +8,8 @@
 
 #include "graphics/Lighting/LightManager.h"
 
+#include "scene/SceneObject.h"
+
 #include "core/Logger.h"
 #include "core/Debug.h"
 #define DEBUG_PTR(ptr) DEBUG::DebugForEngineObjectPointers(ptr)
@@ -88,6 +90,25 @@ namespace SHADER
         m_glProgram->setUniform("view", view);
         m_glProgram->setUniform("projection", projection);
         m_glProgram->setVec3("viewPos", cameraPos);
+    }
+
+    void BasicShader::setShaderInterface(const std::shared_ptr<SCENE::SceneObject>& lightObject)
+    {
+        if (!lightObject) {
+            Logger::warn("[BasicShader::setShaderInterface] lightObject is nullptr!");
+            return;
+        }
+        m_shaderInterface = lightObject;
+        DEBUG_PTR(m_shaderInterface);
+	}
+
+    std::shared_ptr<SCENE::SceneObject> BasicShader::getShaderInterface() const
+    {
+        if (!m_shaderInterface) {
+            Logger::warn("[BasicShader::getShaderInterface] m_glProgram is nullptr!");
+            return nullptr;
+        }
+		return m_shaderInterface;
     }
 
 }

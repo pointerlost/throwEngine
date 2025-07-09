@@ -17,6 +17,8 @@ namespace GLgraphics
 
 	void Transformations::setRotation(float angleInDegrees, const glm::vec3& axis)
 	{
+		rotationAxis = axis;
+		rotationAngle = angleInDegrees;
 		rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angleInDegrees), axis);
 	}
 
@@ -30,11 +32,11 @@ namespace GLgraphics
 		rotationMatrix = glm::rotate(rotationMatrix, glm::radians(angleInDegrees), axis);
 	}
 
-	void Transformations::updateAll(float angleInDegrees, const glm::vec3& pos, const glm::vec3& axis, const glm::vec3& scaleVec)
+	void Transformations::updateAll(const glm::vec3& angles, const glm::vec3& pos, const glm::vec3& scaleVec)
 	{
-		setPosition(pos);
-		setRotation(angleInDegrees, axis); // rotate around x-axis
-		setScale(scaleVec);
+		if (pos != position) position = pos;
+		if (eulerAngles != angles) eulerAngles = angles;
+		if (scale != scaleVec) scale = scaleVec;
 	}
 
 	void Transformations::resetAll()
@@ -51,6 +53,10 @@ namespace GLgraphics
 	{
 		glm::mat4 T = glm::translate(glm::mat4(1.0f), position);
 		glm::mat4 S = glm::scale(glm::mat4(1.0f), scale);
+
+		glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(eulerAngles.x), glm::vec3(1, 0, 0));
+		R = glm::rotate(R, glm::radians(eulerAngles.y), glm::vec3(0, 1, 0));
+		R = glm::rotate(R, glm::radians(eulerAngles.z), glm::vec3(0, 0, 1));
 
 		return T * rotationMatrix * S;
 	}

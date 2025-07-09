@@ -6,9 +6,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/fwd.hpp>
 
-namespace MATERIAL   { struct Material;    };
-namespace GLgraphics { class RenderData;   };
-namespace LIGHTING   { class Light;		   };
+namespace MATERIAL   { struct Material;     };
+namespace GLgraphics { class  RenderData;   };
+namespace LIGHTING   { class  Light;		};
+namespace SCENE		 { class  SceneObject;  };
 
 namespace SHADER
 {
@@ -36,6 +37,9 @@ namespace SHADER
 		virtual void setMatrices(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection, const glm::vec3& cameraPos) = 0;
 
 		const void setRenderDataObject(const std::shared_ptr<GLgraphics::RenderData>& renderData) { m_renderData = renderData; };
+
+		virtual void setShaderInterface(const std::shared_ptr<SCENE::SceneObject>& lightObject) = 0;
+		virtual std::shared_ptr<SCENE::SceneObject> getShaderInterface() const = 0;
 
 	protected:
 		std::shared_ptr<GLgraphics::RenderData> m_renderData;

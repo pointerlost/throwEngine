@@ -28,6 +28,16 @@
 
 #include "graphics/Lighting/LightManager.h"
 
+#include <graphics/Lighting/Light.h>
+
+#include "shaders/ShaderManager.h"
+
+#include "shaders/BasicShader.h"
+
+#include "shaders/LightShader.h"
+
+#include "shaders/GridShader.h"
+
 #include "graphics/Material/MaterialLib.h"
 
 #include "graphics/Camera/Camera.h"
@@ -35,6 +45,9 @@
 #include "core/Logger.h"
 #include "core/Debug.h"
 #define DEBUG_PTR(ptr) DEBUG::DebugForEngineObjectPointers(ptr)
+
+constexpr const char* BASICSHADER_NAME = "basicShader";
+constexpr const char* LIGHTSHADER_NAME = "lightObjectShader";
 
 namespace SCENE
 {
@@ -44,14 +57,34 @@ namespace SCENE
 		DEBUG_PTR(meshData3D);
 	}
 
-    bool Scene::SetUpResources(const std::shared_ptr<MATERIAL::MaterialLibrary>& library)
+	void Scene::debugDrawing(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
+	{
+		//DEBUG MODE
+		for (auto& obj : sceneObjects) {
+			try {
+				if (obj) {
+					obj->draw(view, projection, renderData);
+				}
+				else {
+					throw std::runtime_error("trying to draw an object that returns nullptr!");
+					// using throw can be costly (especially in per-frame loops)
+				}
+			}
+			catch (const std::exception& e) {
+				Logger::error("Error drawing object " + obj->getObjectName() + ": " + e.what());
+				continue;
+			}
+		}
+	}
+
+	bool Scene::SetUpResources(const std::shared_ptr<MATERIAL::MaterialLibrary>& library)
     {
 		if (!m_sceneObjectFactory) {
 			Logger::error("Scene can't setup m_sceneObjectFactory is nullptr!");
 			return false;
 		}
 
-        auto basicShader = m_shaderManager->getShaderInterface("basicShader");
+        auto basicShader = m_shaderManager->getShaderInterface(BASICSHADER_NAME);
         if (!basicShader) {
             Logger::warn("[Warning] basicShader not found, using fallback");
             basicShader = m_shaderManager->getShaderInterface("default");
@@ -61,7 +94,7 @@ namespace SCENE
             }
         }
 
-        auto lightShader = m_shaderManager->getShaderInterface("lightObjectShader");
+        auto lightShader = m_shaderManager->getShaderInterface(LIGHTSHADER_NAME);
         if (!lightShader) {
             Logger::warn("[Warning] lightObjectShader not found, using fallback");
             lightShader = m_shaderManager->getShaderInterface("default");
@@ -71,64 +104,33 @@ namespace SCENE
             }
         }
 
-		// SUN
-		// change the lighting below!
-		// already we have different light types, so create like that-> createPointLight, createDirectionalLight
-        for (int i = 0; i < 4; i++)
-        {
-            std::string name = "sphere_" + std::to_string(i);
+		std::shared_ptr<LIGHTING::Light> lightObj;
+		std::shared_ptr<SceneObject> lightObject;
 
-            const auto sphere = m_sceneObjectFactory->createSphere(
-				"gold",
-                glm::vec3{ 30.0f, 30.0f, 15.0f },
-                lightShader
-            );
-			sphere->setID( uniqueObjectIDGenerator() );
-            sphere->setObjectName(name);
-            sphere->addInputComponent(std::make_shared<InputComponent::SunInputComponent>(
-                sphere->getTransform(), inputContext));
+		std::tie(lightObj, lightObject) = m_sceneObjectFactory->createSpotLight(
+			"sun", // name of the light
+			glm::vec3{ 30.0f, 25.0f, 15.0f }, // position of the light
+			lightShader, // shader for the light
+			library // material library for the light
+		);
+		getLightManager()->addLightToVec(lightObj);
+		AddObjectIntoScene(lightObject);
 
-            AddObjectIntoScene(sphere);
+		std::tie(lightObj, lightObject) = m_sceneObjectFactory->createSpotLight(
+			"sun1",
+			glm::vec3{ 30.0f, 25.0f, 15.0f },
+			lightShader,
+			library
+		);
+		getLightManager()->addLightToVec(lightObj);
+		AddObjectIntoScene(lightObject);
 
-			auto lightData = std::make_shared<LIGHTING::LightData>(sphere->getTransform()->getPosition());
-			if (!lightData) {
-				Logger::warn("[Scene::initResources] lightData is nullptr!");
-				continue;
-			}
-
-			auto light = std::make_shared<LIGHTING::Light>(sphere, lightData);
-			if (!light) {
-				Logger::warn("[WARN] [Scene::initResources] light is nullptr, creating light object skipping!");
-				continue;
-			}
-
-			// we are converting int to LightType for setting light type
-			// in that case setLightType taking sequential values according to the loop
-			light->setLightType(static_cast<LIGHTING::LightType>(i));
-
-			getLightManager()->addLightToVec(light);
-        }
-
-		// CUBES
-        for (int i = 0; i < 5; i++)
-        {
-            std::string name = "cube_" + std::to_string(i);
-
-			const auto cube = m_sceneObjectFactory->createCube(
-				"black plastic",
-                glm::vec3{ 0.0f, 0.0f, i * 7.5f },
-                basicShader
-            );
-			cube->setID(uniqueObjectIDGenerator());
-            cube->setObjectName(name);
-            cube->getTransform()->setScale(glm::vec3{ 2.5f, 3.5f, 2.5f });
-
-            if (i < 1) {
-                cube->addInputComponent(std::make_shared<InputComponent::CubeInputComponent>(
-                    cube->getTransform(), inputContext));
-            }
-            AddObjectIntoScene(cube);
-        }
+		auto cube1 = m_sceneObjectFactory->createCube(
+			"black plastic",
+			glm::vec3{ 0.0f, 0.0f, 0.0f },
+			basicShader
+		);
+		AddObjectIntoScene(cube1);
 
 		// Floor
         const auto floor = m_sceneObjectFactory->createCube(
@@ -136,11 +138,8 @@ namespace SCENE
             glm::vec3{ 0.0f, -2.5f, 0.0f },
             basicShader
         );
-		floor->setID(uniqueObjectIDGenerator());
-		floor->setObjectName("floor");
         floor->getTransform()->setScale(glm::vec3{ 50.5f, 1.5f, 50.5f });
         AddObjectIntoScene(floor);
-
 
 		// create your own object-specific materials
 		giveYourOwnMaterialsToObjects(library);
@@ -152,8 +151,13 @@ namespace SCENE
 	void Scene::giveYourOwnMaterialsToObjects(const std::shared_ptr<MATERIAL::MaterialLibrary>& library)
 	{
 		// copy materials to the sceneobjects
-		for (auto& obj : sceneObjects)
+		for (auto& obj : sceneObjects) {
+			if (obj->getMaterialInstance()) {
+				Logger::warn("[Scene::giveYourOwnMaterialsToObjects] object already has a material instance, skipping!");
+				continue;
+			}
 			obj->initializeMaterial(library);
+		}
 	}
 
 	bool Scene::initGrid(std::shared_ptr<GLgraphics::RenderData> renderData)
@@ -181,7 +185,41 @@ namespace SCENE
 		return true;
 	}
 
-	void Scene::drawAllObjects(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
+	void Scene::drawLightObjects(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
+	{
+		auto& lights = m_lightManager->getLightsByVec();
+
+		for (auto& light : lights) {
+			if (!light) {
+				Logger::warn("[Scene::drawLightObjects] light is nullptr, skipping!");
+				continue;
+			}
+			auto shaderInterface = light->getSourceObject()->getShaderInterface();
+			if (!shaderInterface) {
+				Logger::warn("[Scene::drawLightObjects] shaderInterface is nullptr, skipping!");
+				continue;
+			}
+			auto shaderProgram = shaderInterface->getGLShaderProgram();
+			if (!shaderProgram) {
+				Logger::warn("[Scene::drawLightObjects] shaderProgram is nullptr, skipping!");
+				continue;
+			}
+			auto lightShader = std::dynamic_pointer_cast<SHADER::LightShader>(shaderInterface);
+			if (!lightShader) {
+				Logger::warn("[Scene::drawLightObjects] lightShader is nullptr, skipping!");
+				continue;
+			}
+
+			shaderProgram->bind();
+			shaderProgram->setMat4("u_view", view);
+			shaderProgram->setMat4("u_projection", projection);
+
+			light->getSourceObject()->draw(view, projection, renderData);
+		}
+
+	}
+
+	void Scene::drawGrid(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
 	{
 		if (auto gridRenderer = renderData->getGridRenderer()) {
 			if (auto shader = gridRenderer->getGridShader()) {
@@ -194,7 +232,14 @@ namespace SCENE
 				}
 			}
 		}
+	}
 
+	void Scene::drawAllObjects(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
+	{
+		drawGrid(view, projection, renderData);
+	
+		drawLightObjects(view, projection, renderData);
+	
 		for (auto& obj : sceneObjects) {
 			
 			if (obj)
@@ -202,23 +247,10 @@ namespace SCENE
 			else
 				Logger::warn("trying to draw an object that returns nullptr!");
 		}
+	}
 
-		// DEBUG MODE
-		//for (auto& obj : sceneObjects) {
-		//	try {
-		//		if (obj) {
-		//			obj->draw(view, projection, renderData);
-		//		}
-		//		else {
-		//			throw std::runtime_error("trying to draw an object that returns nullptr!");
-		//			// using throw can be costly (especially in per-frame loops)
-		//		}
-		//	}
-		//	catch (const std::exception& e) {
-		//		Logger::error("Error drawing object " + obj->getObjectName() + ": " + e.what());
-		//		continue;
-		//	}
-		//}
+	void Scene::createLightObjects(const std::shared_ptr<MATERIAL::MaterialLibrary>& library)
+	{
 	}
 
 	void Scene::AddObjectIntoScene(const std::shared_ptr<SceneObject>& object)

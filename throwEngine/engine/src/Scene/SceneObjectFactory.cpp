@@ -16,6 +16,8 @@
 #include "graphics/Mesh/GLMeshFactory.h"
 #include "graphics/Mesh/GLMesh3D.h"
 
+#include <Input/InputComponent.h>
+
 #include "graphics/GLTransformations/Transformations.h"
 
 
@@ -61,29 +63,13 @@ namespace SCENE
         auto addMesh = [&](const std::string& name) {
             auto [vertices, indices] = m_pImpl->meshFactory->createMeshObject(name);
             m_pImpl->meshData->AddMesh3DToMeshData(name, vertices, indices);
-            };
+        };
 
         addMesh("cube");
         addMesh("sphere");
         addMesh("triangle");
         addMesh("square");
         addMesh("circle");
-    }
-
-    std::shared_ptr<SceneObject> SceneObjectFactory::createSun(
-        const std::string& materialName,
-        const glm::vec3& position,
-        std::shared_ptr<SHADER::IShader> shader)
-    {
-        auto sun = std::make_shared<SceneObject>(
-            std::make_shared<GLgraphics::MeshSphere3D>(m_pImpl->meshData, m_pImpl->meshData->getObjectInfo("sphere")),
-            "sun_" + std::to_string(rand()),
-            materialName
-        );
-        sun->setShaderInterface(shader);
-        sun->getTransform()->setPosition(position);
-        sun->getTransform()->setScale(glm::vec3(2.0f)); // Sun is typically larger
-        return sun;
     }
 
     std::shared_ptr<SceneObject> SceneObjectFactory::createCube(
@@ -96,8 +82,14 @@ namespace SCENE
             "cube_" + std::to_string(rand()),  // Unique name
             materialName
         );
+        Input::InputContext inputContext{};
+
+        cube->addInputComponent(std::make_shared<InputComponent::SphereInputComponent>(
+            cube->getTransform(), inputContext));
+        cube->setID(uniqueObjectIDGenerator());
         cube->setShaderInterface(shader);
         cube->getTransform()->setPosition(position);
+        cube->getTransform()->setScale(glm::vec3{ 7.5f, 7.5f, 7.5f });
         return cube;
     }
 
@@ -108,78 +100,96 @@ namespace SCENE
     {
         auto sphere = std::make_shared<SceneObject>(
             std::make_shared<GLgraphics::MeshSphere3D>(m_pImpl->meshData, m_pImpl->meshData->getObjectInfo("sphere")),
-            "sphere_",
+			"sphere_" + std::to_string(rand()),  // Unique name
             materialName
         );
+        Input::InputContext inputContext{};
+
+		// Set up the sphere's transformation and input component
+        sphere->addInputComponent(std::make_shared<InputComponent::SphereInputComponent>(
+			sphere->getTransform(), inputContext ));
+        sphere->setID(uniqueObjectIDGenerator());
+        sphere->setObjectName("sphere_" + std::to_string((uniqueObjectIDGenerator())));
         sphere->setShaderInterface(shader);
         sphere->getTransform()->setPosition(position);
+        sphere->getTransform()->setScale(glm::vec3{ 3.5f, 3.5f, 3.5f });
         return sphere;
     }
 
-    std::shared_ptr<LIGHTING::Light> SceneObjectFactory::createPointLight(
+    std::pair<std::shared_ptr<LIGHTING::Light>, std::shared_ptr<SceneObject>> SceneObjectFactory::createPointLight(
         const std::string& objectName,
         const glm::vec3& position,
         std::shared_ptr<SHADER::IShader> lightShader,
         std::shared_ptr<MATERIAL::MaterialLibrary> materialLib)
     {
-        auto lightObject = createSphere("emissive", position, lightShader);
-        lightObject->setObjectName(objectName);
-        lightObject->getTransform()->setScale(glm::vec3(0.5));
+        Input::InputContext inputContext{};
+
+        auto lightObject = createSphere("gold", position, lightShader);
+        lightObject->setObjectName("point_" + std::to_string((uniqueObjectIDGenerator())));
+        lightObject->addInputComponent(std::make_shared<InputComponent::LightInputComponent>(
+            lightObject->getTransform(), inputContext));
 
         // create light component
         auto lightData = std::make_shared<LIGHTING::LightData>(position);
-        lightData->setDiffuse(glm::vec3(1.0, 0.9, 0.8));
-        lightData->setConstant(1.0);
-        lightData->setLinear(0.09);
-        lightData->setQuadratic(0.032);
 
         auto light = std::make_shared<LIGHTING::Light>(lightObject, lightData);
         light->setLightType(LIGHTING::LightType::Point);
 
-        return light;
+        return { light, lightObject };
     }
 
-    std::shared_ptr<LIGHTING::Light> SceneObjectFactory::createDirectionalLight(
+    std::pair<std::shared_ptr<LIGHTING::Light>, std::shared_ptr<SceneObject>> SceneObjectFactory::createDirectionalLight(
         const std::string& objectName,
         const glm::vec3& position,
         std::shared_ptr<SHADER::IShader> lightShader,
         std::shared_ptr<MATERIAL::MaterialLibrary> materialLib)
     {
+        Input::InputContext inputContext{};
+        
         // Create visual representation (sun)
-        auto lightObject = createSun("emissive", position, lightShader);
-        lightObject->setObjectName(objectName);
+        auto lightObject = createSphere("gold", position, lightShader);
+        lightObject->setObjectName("directional_" + std::to_string((uniqueObjectIDGenerator())));
+        lightObject->getTransform()->setScale(glm::vec3(0.5f, 1.5f, 0.5f)); // Elongated sphere for spotlight
+        lightObject->addInputComponent(std::make_shared<InputComponent::LightInputComponent>(
+            lightObject->getTransform(), inputContext));
 
         // Create light component
         auto lightData = std::make_shared<LIGHTING::LightData>(position);
-        lightData->setDiffuse(glm::vec3(1.0f, 0.95f, 0.9f)); // Sunlight color
 
         auto light = std::make_shared<LIGHTING::Light>(lightObject, lightData);
         light->setLightType(LIGHTING::LightType::Directional);
 
-        return light;
+        return { light, lightObject };
     }
 
-    std::shared_ptr<LIGHTING::Light> SceneObjectFactory::createSpotLight(
+    std::pair<std::shared_ptr<LIGHTING::Light>, std::shared_ptr<SceneObject>> SceneObjectFactory::createSpotLight(
         const std::string& objectName,
         const glm::vec3& position,
         std::shared_ptr<SHADER::IShader> lightShader,
         std::shared_ptr<MATERIAL::MaterialLibrary> materialLib)
     {
+        Input::InputContext inputContext{};
+
         // Create visual representation (cone-shaped object)
-        auto lightObject = createSphere("emissive", position, lightShader);
-        lightObject->setObjectName(objectName);
-        lightObject->getTransform()->setScale(glm::vec3(0.5f, 1.5f, 0.5f)); // Elongated sphere for spotlight
+        auto lightObject = createSphere("gold", position, lightShader);
+        lightObject->setObjectName("spot_" + std::to_string((uniqueObjectIDGenerator())));
+        lightObject->addInputComponent(std::make_shared<InputComponent::LightInputComponent>(
+			lightObject->getTransform(), inputContext));
 
         // Create light component
         auto lightData = std::make_shared<LIGHTING::LightData>(position);
-        lightData->setDiffuse(glm::vec3(1.0f, 1.0f, 0.9f)); // Bright white-yellow light
-        lightData->setConstant(1.0f);
-        lightData->setLinear(0.09f);
-        lightData->setQuadratic(0.032f);
 
         auto light = std::make_shared<LIGHTING::Light>(lightObject, lightData);
         light->setLightType(LIGHTING::LightType::SpotLight);
 
-        return light;
+		return { light, lightObject };
     }
+
+    uint32_t SceneObjectFactory::uniqueObjectIDGenerator()
+    {
+        static uint32_t uniqueID = 0;
+        m_uniqueObjectID = uniqueID++;
+
+        return m_uniqueObjectID;
+	}
 }

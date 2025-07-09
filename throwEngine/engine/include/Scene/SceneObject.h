@@ -59,7 +59,7 @@ namespace SCENE
 		void setObjectName(const std::string& name) { this->m_objectName = name; };
 		const std::string& getObjectName() const { return m_objectName; };
 
-		std::shared_ptr<GLgraphics::Transformations> getTransform() { return m_transform; };
+		std::shared_ptr<GLgraphics::Transformations>& getTransform() { return m_transform; };
 
 	private:
 		std::shared_ptr<GLgraphics::IMesh> m_mesh;

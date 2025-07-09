@@ -6,6 +6,8 @@
 
 #include "Shaders/ShaderProgram.h"
 
+#include <Scene/SceneObject.h>
+
 #include "core/Logger.h"
 #include "core/Debug.h"
 #define DEBUG_PTR(ptr) DEBUG::DebugForEngineObjectPointers(ptr)
@@ -136,5 +138,37 @@ namespace LIGHTING
                 ? shader->setVec3("light.ambient", glm::vec3(0.2f))
                 : Logger::warn("[LightManager::uploadLights] shader has no light.ambient uniform!");*/
         }
+    }
+
+
+    void LightManager::addLightToMap(const std::shared_ptr<Light>& light)
+    {
+        if (!light) {
+            Logger::warn("[LightManager::addLightToMap] light is nullptr, skipping!");
+            return;
+        }
+        auto& sceneObject = light->getSourceObject();
+        if (!sceneObject) {
+            Logger::warn("[LightManager::addLightToMap] sceneObject is nullptr, skipping!");
+            return;
+        }
+        uint32_t id = sceneObject->getID();
+        if (m_mapGetLightWithSceneObjectID.find(id) != m_mapGetLightWithSceneObjectID.end()) {
+            Logger::warn("[LightManager::addLightToMap] Light with ID already exists, skipping!");
+            return;
+        }
+		m_mapGetLightWithSceneObjectID[id] = light;
+    }
+
+
+    std::shared_ptr<Light> LightManager::getLightWithSceneObjectID(uint32_t sceneObjectID) const
+    {
+        auto it = m_mapGetLightWithSceneObjectID.find(sceneObjectID);
+        if (it != m_mapGetLightWithSceneObjectID.end()) {
+            return it->second;
+        } else {
+            Logger::warn("[LightManager::getLightWithSceneObjectID] Light with ID not found!");
+            return nullptr;
+		}
     }
 }

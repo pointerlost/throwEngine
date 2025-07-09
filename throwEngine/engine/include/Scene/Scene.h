@@ -55,7 +55,12 @@ namespace SCENE
 
 		void setShaderManager(std::shared_ptr<SHADER::ShaderManager> shaderManager) { m_shaderManager = shaderManager; };
 
+		void debugDrawing(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData);
+		void drawLightObjects(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData);
+		void drawGrid(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData);
 		void drawAllObjects(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData);
+
+		void createLightObjects(const std::shared_ptr<MATERIAL::MaterialLibrary>& library);
 
 		void AddObjectIntoScene(const std::shared_ptr<SceneObject>& object);
 		void updateAllObjects();
