@@ -27,6 +27,8 @@ namespace MATERIAL
 
 		uint32_t m_diffuseTextureID;
 		uint32_t m_specularTextureID;
+
+		Material() = default;
 	};
 
 

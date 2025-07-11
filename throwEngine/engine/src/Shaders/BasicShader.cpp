@@ -42,6 +42,7 @@ namespace SHADER
 
             m_glProgram->setVec3(prefix + ".position",     light->getPosition());
             m_glProgram->setVec3(prefix + ".direction",    light->getDirection());
+			m_glProgram->setVec3(prefix + ".ambient",      light->getLightAmbient());
             m_glProgram->setVec3(prefix + ".diffuse",      light->getLightDiffuse());
             m_glProgram->setVec3(prefix + ".specular",     light->getLightSpecular());
             m_glProgram->setFloat(prefix + ".constant",    light->getConstant());

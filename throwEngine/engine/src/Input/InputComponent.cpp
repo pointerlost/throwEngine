@@ -16,7 +16,7 @@
 #include "core/Debug.h"
 #define DEBUG_PTR(ptr) DEBUG::DebugForEngineObjectPointers(ptr)
 
-namespace InputComponent
+namespace Input
 {
 
 	CubeInputComponent::CubeInputComponent(std::shared_ptr<GLgraphics::Transformations> transform, Input::InputContext context)
@@ -97,8 +97,8 @@ namespace InputComponent
 	/*****************************************************************************************************/
 	/*****************************************************************************************************/
 
-	LightInputComponent::LightInputComponent(std::shared_ptr<GLgraphics::Transformations> transform, Input::InputContext context)
-		: m_transformation(transform), m_dataContext(context)
+	LightInputComponent::LightInputComponent(std::shared_ptr<GLgraphics::Transformations> transform, Input::InputContext context, std::shared_ptr<LIGHTING::Light>& myLight)
+		: m_transformation(transform), m_dataContext(context), m_light(myLight)
 	{
 		DEBUG_PTR(m_transformation);
 
@@ -132,15 +132,11 @@ namespace InputComponent
 
 		for (uint32_t i = 0; i < lightVecSize; ++i)
 		{
-			if (!m_inputSelectors[i]) continue;
+			if (!m_inputSelectors[i] && lightVec[i] != m_light) continue;
 
-			auto &sourceObj = lightVec[i]->getSourceObject();
+			m_transformation = m_light->getSourceObject()->getTransform();
 
-			if (!sourceObj) continue;
-
-			m_transformation = sourceObj->getTransform();
-
-			m_isRotating ? circularMotion(lightVec[i]) : moveOnPress(lightVec[i]);
+			m_isRotating ? circularMotion(m_light) : moveOnPress(m_light);
 		}
 	}
 

@@ -2,8 +2,6 @@
 
 #include <Scene/SceneObject.h>
 
-#include "Input/InputComponent.h"
-
 #include <graphics/Mesh/GLMeshFactory.h>
 
 #include "graphics/Mesh/GLMeshCube3D.h"
@@ -39,6 +37,8 @@
 #include "shaders/GridShader.h"
 
 #include "graphics/Material/MaterialLib.h"
+
+#include "Input/InputComponent.h"
 
 #include "graphics/Camera/Camera.h"
 
@@ -116,7 +116,7 @@ namespace SCENE
 		getLightManager()->addLightToVec(lightObj);
 		AddObjectIntoScene(lightObject);
 
-		std::tie(lightObj, lightObject) = m_sceneObjectFactory->createSpotLight(
+		std::tie(lightObj, lightObject) = m_sceneObjectFactory->createPointLight(
 			"sun1",
 			glm::vec3{ 30.0f, 25.0f, 15.0f },
 			lightShader,
@@ -126,7 +126,7 @@ namespace SCENE
 		AddObjectIntoScene(lightObject);
 
 		auto cube1 = m_sceneObjectFactory->createCube(
-			"black plastic",
+			"silver",
 			glm::vec3{ 0.0f, 0.0f, 0.0f },
 			basicShader
 		);
@@ -153,10 +153,12 @@ namespace SCENE
 		// copy materials to the sceneobjects
 		for (auto& obj : sceneObjects) {
 			if (obj->getMaterialInstance()) {
-				Logger::warn("[Scene::giveYourOwnMaterialsToObjects] object already has a material instance, skipping!");
+				Logger::warn("[Scene::giveYourOwnMaterialsToObjects] '" + obj->getObjectName() + "' already has a material instance, skipping!");
 				continue;
 			}
-			obj->initializeMaterial(library);
+			else {
+				obj->initializeMaterial(library);
+			}
 		}
 	}
 
@@ -185,40 +187,6 @@ namespace SCENE
 		return true;
 	}
 
-	void Scene::drawLightObjects(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
-	{
-		auto& lights = m_lightManager->getLightsByVec();
-
-		for (auto& light : lights) {
-			if (!light) {
-				Logger::warn("[Scene::drawLightObjects] light is nullptr, skipping!");
-				continue;
-			}
-			auto shaderInterface = light->getSourceObject()->getShaderInterface();
-			if (!shaderInterface) {
-				Logger::warn("[Scene::drawLightObjects] shaderInterface is nullptr, skipping!");
-				continue;
-			}
-			auto shaderProgram = shaderInterface->getGLShaderProgram();
-			if (!shaderProgram) {
-				Logger::warn("[Scene::drawLightObjects] shaderProgram is nullptr, skipping!");
-				continue;
-			}
-			auto lightShader = std::dynamic_pointer_cast<SHADER::LightShader>(shaderInterface);
-			if (!lightShader) {
-				Logger::warn("[Scene::drawLightObjects] lightShader is nullptr, skipping!");
-				continue;
-			}
-
-			shaderProgram->bind();
-			shaderProgram->setMat4("u_view", view);
-			shaderProgram->setMat4("u_projection", projection);
-
-			light->getSourceObject()->draw(view, projection, renderData);
-		}
-
-	}
-
 	void Scene::drawGrid(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
 	{
 		if (auto gridRenderer = renderData->getGridRenderer()) {
@@ -238,14 +206,19 @@ namespace SCENE
 	{
 		drawGrid(view, projection, renderData);
 	
-		drawLightObjects(view, projection, renderData);
-	
-		for (auto& obj : sceneObjects) {
-			
-			if (obj)
-				obj->draw(view, projection, renderData);
-			else
+		for (auto& obj : sceneObjects)
+		{
+			if (!obj) {
+				Logger::error("Object '" + obj->getObjectName() + "' is nullptr, skipping draw!");
 				Logger::warn("trying to draw an object that returns nullptr!");
+				return;
+			}
+			else if (obj->getObjectType() == ObjectType::Visual)
+				obj->draw(view, projection, renderData);
+			else if (obj->getObjectType() == ObjectType::LightVisual)
+				obj->drawLight(view, projection, renderData);
+			else
+				Logger::warn("unknown object type, skipping draw!");
 		}
 	}
 
@@ -268,16 +241,6 @@ namespace SCENE
 		sceneObjectsMap[objectName] = object;
 
 		sceneObjects.push_back(object);
-	}
-
-	void Scene::updateAllObjects()
-	{
-		//std::cout << "[Scene] Updating all objects\n";
-
-		// Updating Input components on the scene
-		for (auto& obj : sceneObjects) {
-			obj->update(*this);
-		}
 	}
 
 	bool Scene::checkObjectIsAvailable(const std::string& name)
@@ -312,5 +275,17 @@ namespace SCENE
 		return m_uniqueID++;
 	}
 
+	void Scene::addInputComponent(std::shared_ptr<Input::IInputComponent> component)
+	{
+		m_inputComponents.push_back(component);
+		Logger::info("[SceneObject] Input Component added. Total: " + std::to_string(m_inputComponents.size()));
+	}
+
+	void Scene::updateInputComponents()
+	{
+		for (auto& component : m_inputComponents) {
+			component->processInput(*this);
+		}
+	}
 
 }

@@ -30,7 +30,7 @@ namespace GLgraphics
 			return;
 		}
 
-		scene->updateAllObjects();
+		scene->updateInputComponents();
 
 		scene->drawAllObjects(view, projection, m_renderData);
 	}

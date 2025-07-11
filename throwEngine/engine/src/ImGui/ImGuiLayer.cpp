@@ -22,6 +22,8 @@
 
 #include "graphics/Material/MaterialLib.h"
 
+#include <Shaders/ShaderInterface.h>
+
 #include <Config.h>
 
 #include <core/File.h>
@@ -88,16 +90,18 @@ namespace ENGINE::UI
 
 		generalMenuForPanel();
 
-		objectSelectionPanel(sceneObjects);
+		sceneObjectSelectionPanel(sceneObjects);
 
 		implForRenderObjects(sceneObjects);
+
+		lightingPanelWindow();
 		
-		implForLightingPanel();
+		//implForLightingPanel();
 
 		return g_RequestShutdown;
 	}
 
-	void ImGuiLayer::implForLightingPanel()
+	void ImGuiLayer::setLightObjectProperties()
 	{
 		std::string panelTitle = "Lighting Panel";
 
@@ -127,8 +131,17 @@ namespace ENGINE::UI
 		int typeInt = static_cast<int>(currentType);
 
 		// set light type
-		if (ImGui::SliderInt("SetLightType", &typeInt, 0, 2)) // 0 = Directional, 1 = Point, 2 = Spot
-			currentLight->setLightType(static_cast<LIGHTING::LightType>(typeInt));
+		// 0 = Directional, 1 = Point, 2 = Spot
+		if (ImGui::SliderInt("SetLightType", &typeInt, 0, 2)) {
+			currentType = static_cast<LIGHTING::LightType>(typeInt);
+			currentLight->setLightType(currentType);
+		}
+
+		auto& lightColor = currentLight->getLightColorProperties();
+
+		ImGui::ColorEdit3("Set Ambient of Light Color",  glm::value_ptr(lightColor.m_ambient));
+		ImGui::ColorEdit3("Set Diffuse of Light Color",  glm::value_ptr(lightColor.m_diffuse));
+		ImGui::ColorEdit3("Set Specular of Light Color", glm::value_ptr(lightColor.m_specular));
 
 		currentLight->update();
 	}
@@ -153,7 +166,7 @@ namespace ENGINE::UI
 		}
 	}
 
-	void ImGuiLayer::objectSelectionPanel(const std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects)
+	void ImGuiLayer::sceneObjectSelectionPanel(const std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects)
 	{
 		if (!m_showObjectListWindow) return;
 
@@ -178,7 +191,22 @@ namespace ENGINE::UI
 				state.isOpen = !state.isOpen;
 			}
 		}
+	}
 
+	void ImGuiLayer::lightingPanelWindow()
+	{
+		if (!m_showLightSourceObjects) return;
+
+		ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Once);
+
+		ImGuiScopedWindow lightingPanel("Lighting Panel", &m_showLightSourceObjects);
+
+		if (!lightingPanel) {
+			Logger::warn("[ImGuiLayer::lightingPanelWindow] lightingPanel returning false!");
+			return;
+		}
+
+		setLightObjectProperties();
 	}
 
 	void ImGuiLayer::showTransformProperties(std::shared_ptr<SCENE::SceneObject>& object, UIObjectState& state)
@@ -237,39 +265,35 @@ namespace ENGINE::UI
 
 		auto objectType = object->getType();
 
-		if (objectType == SHADER::ShaderType::BASIC)
-		{
-			// ambient
-			ImGui::SliderFloat("Set ambient  R value", &material->m_ambient.x,  0.05, 1.0);
-			ImGui::SliderFloat("Set ambient  G value", &material->m_ambient.y,  0.05, 1.0);
-			ImGui::SliderFloat("Set ambient  B value", &material->m_ambient.z,  0.05, 1.0);
+		// ambient
+		ImGui::SliderFloat("Set ambient  R value", &material->m_ambient.x,  0.05, 1.0);
+		ImGui::SliderFloat("Set ambient  G value", &material->m_ambient.y,  0.05, 1.0);
+		ImGui::SliderFloat("Set ambient  B value", &material->m_ambient.z,  0.05, 1.0);
 
-			ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
+		ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
 
-			// diffuse
-			ImGui::SliderFloat("Set diffuse  R value", &material->m_diffuse.x,  0.0, 1.0);
-			ImGui::SliderFloat("Set diffuse  G value", &material->m_diffuse.y,  0.0, 1.0);
-			ImGui::SliderFloat("Set diffuse  B value", &material->m_diffuse.z,  0.0, 1.0);
+		// diffuse
+		ImGui::SliderFloat("Set diffuse  R value", &material->m_diffuse.x,  0.0, 1.0);
+		ImGui::SliderFloat("Set diffuse  G value", &material->m_diffuse.y,  0.0, 1.0);
+		ImGui::SliderFloat("Set diffuse  B value", &material->m_diffuse.z,  0.0, 1.0);
 
-			// set diffuse color using color picker
-			ImGui::ColorEdit3("Set diffuse color", glm::value_ptr(material->m_diffuse),
-				ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+		// set diffuse color using color picker
+		ImGui::ColorEdit3("Set diffuse color", glm::value_ptr(material->m_diffuse),
+			ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 
-			ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
+		ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
 
-			// specular
-			ImGui::SliderFloat("Set specular R value", &material->m_specular.x, 0.0, 1.0);
-			ImGui::SliderFloat("Set specular G value", &material->m_specular.y, 0.0, 1.0);
-			ImGui::SliderFloat("Set specular B value", &material->m_specular.z, 0.0, 1.0);
+		// specular
+		ImGui::SliderFloat("Set specular R value", &material->m_specular.x, 0.0, 1.0);
+		ImGui::SliderFloat("Set specular G value", &material->m_specular.y, 0.0, 1.0);
+		ImGui::SliderFloat("Set specular B value", &material->m_specular.z, 0.0, 1.0);
 
-			ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
+		ImGui::Dummy(ImVec2(0.0f, 10.0f)); // add some space
 
-			ImGui::Checkbox("Enable diffuse  texture", &material->m_hasDiffuseTexture);
-			ImGui::Checkbox("Enable specular texture", &material->m_hasSpecularTexture);
-		}
-		/*else if (objectType == SHADER::ShaderType::LIGHT)
-		{
-		}*/
+		ImGui::Checkbox("Enable diffuse  texture", &material->m_hasDiffuseTexture);
+		ImGui::Checkbox("Enable specular texture", &material->m_hasSpecularTexture);
+
+		sceneObject->setMaterialInstance(material);
 	}
 
 	void ImGuiLayer::setSceneObjectTransform(std::shared_ptr<SCENE::SceneObject>& sceneObject)
@@ -308,6 +332,16 @@ namespace ENGINE::UI
 		// Update the transform with the new values
 		transform->updateAll(angles, position, scale);
 
+		auto lightSource = sceneObject->getLightSource();
+		if (lightSource)
+		{
+			auto lightData = lightSource->getLightData();
+
+			lightData->setPosition(position);
+		
+			lightSource->update();
+		}
+
 		ImGui::PopID(); // Pop the ID to avoid conflicts with other objects
 	}
 
@@ -341,6 +375,15 @@ namespace ENGINE::UI
 					// Engine Shutdown
 					if (ImGui::MenuItem("Exit"))
 						g_RequestShutdown = true;
+				}
+			}
+
+			{
+				ImGuiScopedMenu lightingMenu("LIGHTING");
+				if (lightingMenu)
+				{
+					if (ImGui::MenuItem("Change Light Types", nullptr, m_showLightSourceObjects))
+						m_showLightSourceObjects = !m_showLightSourceObjects;
 				}
 			}
 		}

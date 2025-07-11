@@ -7,8 +7,17 @@ namespace GLgraphics { class Transformations; };
 namespace SCENE		 { class Scene;			  };
 namespace LIGHTING   { class Light;			  };
 
-namespace InputComponent
+namespace Input
 {
+
+	// Enum to identify the type of input component
+	enum struct InputType
+	{
+		SphereInputComponent,
+		CubeInputComponent,
+		CircleInputComponent,
+		LightInputComponent,
+	};
 
 	// This is a Interface class for Input components!
 	class IInputComponent
@@ -23,25 +32,10 @@ namespace InputComponent
 		virtual void setUpInputContext() = 0;
 
 		virtual void changeInputObjectWithPress(uint32_t lightVecSize) = 0;
+
+		virtual InputType getInputType() const = 0;
 	};
 
-
-	/*class TriangleInputComponent : public IInputComponent
-	{
-	public:
-		TriangleInputComponent() = default;
-
-		void processInput(SCENE::Scene& scene) override;
-	};*/
-
-
-	/*class SquareInputComponent : public IInputComponent
-	{
-	public:
-		SquareInputComponent() = default;
-
-		void processInput(SCENE::Scene& scene) override;
-	};*/
 
 	class SphereInputComponent : public IInputComponent
 	{
@@ -55,12 +49,16 @@ namespace InputComponent
 
 		void changeInputObjectWithPress(uint32_t lightVecSize) override;
 
+		InputType getInputType() const override { return m_inputType; }
+
 	private:
 		std::shared_ptr<GLgraphics::Transformations> m_transformation;
 		Input::InputContext m_dataContext;
 
 		int m_activeLightComponentIdx = 0;
 		std::vector<bool> m_inputSelectors;
+
+		InputType m_inputType = InputType::SphereInputComponent;
 
 		bool m_isRotating = false;
 	};
@@ -76,10 +74,14 @@ namespace InputComponent
 
 		void setUpInputContext() override;
 
-		void changeInputObjectWithPress(uint32_t lightVecSize) = 0;
+		void changeInputObjectWithPress(uint32_t lightVecSize) {};
+
+		InputType getInputType() const override { return m_inputType; }
 
 	private:
 		std::shared_ptr<GLgraphics::Transformations> m_transformation;
+
+		InputType m_inputType = InputType::CubeInputComponent;
 
 		Input::InputContext m_dataContext;
 	};
@@ -94,10 +96,15 @@ namespace InputComponent
 
 		void setUpInputContext() override;
 
-		void changeInputObjectWithPress(uint32_t lightVecSize) = 0;
+		void changeInputObjectWithPress(uint32_t lightVecSize) {};
+
+		InputType getInputType() const override { return m_inputType; }
 
 	private:
 		std::shared_ptr<GLgraphics::Transformations> m_transformation;
+
+		InputType m_inputType = InputType::CircleInputComponent;
+
 		Input::InputContext m_dataContext;
 	};
 
@@ -105,21 +112,27 @@ namespace InputComponent
 	class LightInputComponent : public IInputComponent
 	{
 	public:
-		LightInputComponent(std::shared_ptr<GLgraphics::Transformations> transform, Input::InputContext context);
+		LightInputComponent(std::shared_ptr<GLgraphics::Transformations> transform, Input::InputContext context, std::shared_ptr<LIGHTING::Light>& myLight);
 
 		void processInput(SCENE::Scene& scene) override;
 
 		void setUpInputContext() override;
 
+		void changeInputObjectWithPress(uint32_t lightVecSize) override;
+
+		InputType getInputType() const override { return m_inputType; }
+		
 		void circularMotion(std::shared_ptr<LIGHTING::Light>& light);
 
 		void moveOnPress(std::shared_ptr<LIGHTING::Light>& light);
 
-		void changeInputObjectWithPress(uint32_t lightVecSize) override;
-
 	private:
 		std::shared_ptr<GLgraphics::Transformations> m_transformation;
 		Input::InputContext m_dataContext;
+
+		InputType m_inputType = InputType::LightInputComponent;
+
+		std::shared_ptr<LIGHTING::Light> m_light;
 
 		int m_activeLightComponentIdx = 0;
 		std::vector<bool> m_inputSelectors;

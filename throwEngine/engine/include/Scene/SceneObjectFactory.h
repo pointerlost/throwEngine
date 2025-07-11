@@ -35,11 +35,6 @@ namespace SCENE
 
 		std::shared_ptr<GLgraphics::MeshData3D> getMeshData() const;
 
-		std::shared_ptr<SceneObject> createSun(
-			const std::string& materialName,
-			const glm::vec3& position,
-			std::shared_ptr<SHADER::IShader> shader);
-
 		std::shared_ptr<SceneObject> createCube(
 			const std::string& materialName,
 			const glm::vec3& position,
@@ -73,13 +68,18 @@ namespace SCENE
 
 		uint32_t uniqueObjectIDGenerator();
 
-
+		Input::InputContext createInputContext() {
+			Input::InputContext inputContext{};
+			inputContext.m_rotationSpeed = 0.5f;
+			inputContext.m_delta = 0.016f; // Assuming 60 FPS
+			inputContext.m_angle = 0.0f;
+			inputContext.m_radius = 45.0f;
+			return inputContext;
+		};
 
 	private:
 		struct Impl;
 		std::unique_ptr<Impl> m_pImpl;
-
-		uint32_t m_uniqueObjectID = 0;
 		
 		void initBaseMeshes();
 	};

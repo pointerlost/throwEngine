@@ -9,26 +9,10 @@
 namespace LIGHTING
 {
 
-	struct LightColor
-	{
-		glm::vec3 m_color;
-		glm::vec3 m_diffuse;
-		glm::vec3 m_specular;
-	};
-
 	class LightData
 	{
 	public:
 		LightData(const glm::vec3& lightPos);
-
-		glm::vec3& getLightObjectColor() { return m_lightColor.m_color; };
-
-		// LightColor
-		void setDiffuse(const glm::vec3& diffuse)   { m_lightColor.m_diffuse   = diffuse;   };
-		void setSpecular(const glm::vec3& specular) { m_lightColor.m_specular  = specular;  };
-
-		const glm::vec3& getDiffuse()   const { return m_lightColor.m_diffuse;   };
-		const glm::vec3& getSpecular()  const { return m_lightColor.m_specular;  };
 
 		void calculateDirection(const glm::vec3& objectPosition);
 		void setPosition(const glm::vec3& pos)  { m_pos = pos; };
@@ -58,12 +42,12 @@ namespace LIGHTING
 		glm::vec3 m_SceneCenter;
 
 		// spotlight soft edge section
-		float m_cutOff;
-		float m_outerCutOff;
-		float m_constant;
-		float m_linear;
-		float m_quadratic;
+		float m_cutOff		= (glm::cos(glm::radians(12.5)));
+		float m_outerCutOff = (glm::cos(glm::radians(17.5)));
 
-		LightColor m_lightColor;
+		// attenuation parameters
+		float m_constant  = 1.0f;
+		float m_linear	  = 0.014f;
+		float m_quadratic = 0.0007f;
 	};
 }

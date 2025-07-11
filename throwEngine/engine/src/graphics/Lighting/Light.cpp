@@ -14,10 +14,9 @@ namespace LIGHTING
 		m_lightData->setPosition(m_SceneObject->getTransform()->getPosition());
 
 		// Material Initialization
-		m_lightObjectMaterial.m_ambient   = glm::vec3{ 0.24725f,  0.1995f,   0.0745f   };
-		m_lightObjectMaterial.m_diffuse   = glm::vec3{ 0.75164f,  0.60648f,  0.22648f  };
-		m_lightObjectMaterial.m_specular  = glm::vec3{ 0.628281f, 0.555802f, 0.366065f };
-		m_lightObjectMaterial.m_shininess = 64.0f;
+		m_lightObjectColor.m_ambient   = glm::vec3{ 0.24725f,  0.1995f,   0.0745f   };
+		m_lightObjectColor.m_diffuse   = glm::vec3{ 0.75164f,  0.60648f,  0.22648f  };
+		m_lightObjectColor.m_specular  = glm::vec3{ 0.628281f, 0.555802f, 0.366065f };
 	}
 
 	void Light::update()

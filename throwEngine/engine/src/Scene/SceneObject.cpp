@@ -10,6 +10,7 @@
 
 #include "Shaders/ShaderProgram.h"
 #include "Shaders/LightShader.h"
+#include "Shaders/BasicShader.h"
 #include "Shaders/GridShader.h"
 
 #include "graphics/Mesh/GLMeshTriangle3D.h"
@@ -88,6 +89,42 @@ namespace SCENE
 		return true;
 	}
 
+	bool SceneObject::validateRenderStateLight(const std::shared_ptr<GLgraphics::RenderData>& renderData)
+	{
+		auto& lightShader = m_shaderInterface;
+		if (!lightShader) {
+			Logger::error("[ERROR] [SceneObject::drawLight] LightShader is nullptr!");
+			return false;
+		}
+
+		// shader is an interface
+		auto& iShader = m_shaderInterface;
+		DEBUG_PTR(iShader);
+
+		if (!iShader) {
+			Logger::warn("[WARN] [SceneObject] Shader Interface not found! Skipping draw.");
+			return false;
+		}
+
+		auto lightManager = renderData->getLightManager();
+		DEBUG_PTR(lightManager);
+
+		if (!lightManager) {
+			Logger::warn("[WARN] [SceneObject] LightManager missing! Skipping draw.");
+			return false;
+		}
+
+		auto camera = renderData->getCamera();
+		DEBUG_PTR(camera);
+
+		if (!camera) {
+			Logger::warn("[WARN] [SceneObject] Camera missing! Skipping draw.");
+			return false;
+		}
+
+		return true;
+	}
+
 	void SceneObject::initializeMaterial(const std::shared_ptr<MATERIAL::MaterialLibrary>& library)
 	{
 		auto base = library->getMaterialByName(m_materialName);
@@ -97,6 +134,29 @@ namespace SCENE
 	void SceneObject::setMaterialInstance(std::shared_ptr<MATERIAL::Material> instance)
 	{
 		m_materialInstance = instance;
+	}
+
+	void SceneObject::setShaderInterface(const std::shared_ptr<SHADER::IShader> shader)
+	{
+		if (!shader) {
+			Logger::error("[ERROR] [SceneObject::setShaderInterface] Shader is nullptr!");
+			return;
+		}
+		if (shader->getType() == SHADER::ShaderType::LIGHT) {
+			m_shaderInterface = std::dynamic_pointer_cast<SHADER::LightShader>(shader);
+			if (!m_shaderInterface) {
+				Logger::error("[ERROR] [SceneObject::setShaderInterface] Failed to cast to LightShader!");
+			}
+		}
+		else if (shader->getType() == SHADER::ShaderType::BASIC) {
+			m_shaderInterface = std::dynamic_pointer_cast<SHADER::BasicShader>(shader);
+			if (!m_shaderInterface) {
+				Logger::error("[ERROR] [SceneObject::setShaderInterface] Failed to cast to BasicShader!");
+			}
+		}
+		else {
+			Logger::warn("[WARN] [SceneObject::setShaderInterface] Unknown shader type, using default shader.");
+		}
 	}
 
 	void SceneObject::draw(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
@@ -131,17 +191,24 @@ namespace SCENE
 		m_mesh->drawMeshObject();
 	}
 
-	void SceneObject::update(SCENE::Scene &scene)
+	void SceneObject::drawLight(const glm::mat4& view, const glm::mat4& projection, const std::shared_ptr<GLgraphics::RenderData>& renderData)
 	{
-		for (auto& component : inputComponents) {
-			component->processInput(scene);
+		if (!validateRenderStateLight(renderData)) {
+			Logger::error("[ERROR] [SceneObject::drawLight] validateRenderStateLight pointer initialization failed!");
+			return;
 		}
-	}
 
-	void SceneObject::addInputComponent(std::shared_ptr<InputComponent::IInputComponent> component)
-	{
-		inputComponents.push_back(component);
-		Logger::info("[SceneObject] Input Component added. Total: " + std::to_string(inputComponents.size()));
+		auto& lightShader = m_shaderInterface;
+		
+		lightShader->bind();
+
+		const glm::mat4 model = m_transform->getModelMatrix();
+		glm::vec3 cameraPos = renderData->getCamera()->getCameraPosition();
+
+		lightShader->setMatrices(model, view, projection, cameraPos);
+		lightShader->setLights(renderData->getLightManager()->getLightsByVec());
+
+		m_mesh->drawMeshObject();
 	}
 
 }

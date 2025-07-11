@@ -28,10 +28,12 @@ namespace ENGINE::UI
 
 		bool imGuiImplementations(std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects);
 
-		void implForLightingPanel();
+		void setLightObjectProperties();
 		void implForRenderObjects(std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects);
 
-		void objectSelectionPanel(const std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects);
+		void sceneObjectSelectionPanel(const std::vector<std::shared_ptr<SCENE::SceneObject>>& sceneObjects);
+
+		void lightingPanelWindow();
 
 		void showMaterialProperties(std::shared_ptr<SCENE::SceneObject>& object, UIObjectState& state);
 		void showTransformProperties(std::shared_ptr<SCENE::SceneObject>& object, UIObjectState& state);
@@ -58,7 +60,8 @@ namespace ENGINE::UI
 
 		std::unordered_map<std::string, UIObjectState> m_objectUIStates;
 
-		bool m_showObjectListWindow = false;
+		bool m_showObjectListWindow   = false;
+		bool m_showLightSourceObjects = false;
 
 		std::string m_fontPath;
 	};

@@ -10,19 +10,16 @@ namespace LIGHTING
 
 	enum class LightType
 	{
-		Point,
-		Directional,
-		SpotLight
+		Point		= 0,
+		Directional = 1,
+		Spot		= 2
 	};
 
-	struct Material
+	struct LightColor
 	{
 		glm::vec3 m_ambient;
 		glm::vec3 m_diffuse;
 		glm::vec3 m_specular;
-		float m_shininess;
-
-		glm::vec3 m_color;
 	};
 
 	class Light
@@ -34,39 +31,56 @@ namespace LIGHTING
 
 		std::shared_ptr<SCENE::SceneObject>& getSourceObject() { return m_SceneObject; };
 
-		glm::vec3& getLightObjectColor() const { return m_lightData->getLightObjectColor(); };
-
 		void setLightType(LightType type) { m_type = type; };
 		LightType getType() const { return m_type; };
 
-		// Light Color
-		const glm::vec3& getLightDiffuse()  const { return m_lightData->getDiffuse();   };
-		const glm::vec3& getLightSpecular() const { return m_lightData->getSpecular();  };
-		
+		void setLightData(std::shared_ptr<LightData> lightData) { m_lightData = lightData; };
+		std::shared_ptr<LightData> getLightData() const { return m_lightData; };
+
 		const glm::vec3& getDirection()     const { return m_lightData->getDirection(); };
 		const glm::vec3& getPosition()      const { return m_lightData->getPosition();  };
 		
-		// spotlight
-		float getCutOff()	   const { return m_lightData->getCutOff();		 };
-		float getOuterCutOff() const { return m_lightData->getOuterCutOff(); };
-		float getConstant()    const { return m_lightData->getConstant();    };
-		float getLinear()	   const { return m_lightData->getLinear();		 };
-		float getQuadratic()   const { return m_lightData->getQuadratic();   };
+		// spotlight on
+		void setCutOff(float cutOff) { m_lightData->setCutOff(cutOff); }
+		float getCutOff() const { return m_lightData->getCutOff(); }
+
+		void setOuterCutOff(float outerCutOff) { m_lightData->setOuterCutOff(outerCutOff); }
+		float getOuterCutOff() const { return m_lightData->getOuterCutOff(); }
+
+		void setConstant(float constant) { m_lightData->setConstant(constant); }
+		float getConstant() const { return m_lightData->getConstant(); }
+
+		void setLinear(float linear) { m_lightData->setLinear(linear); }
+		float getLinear() const { return m_lightData->getLinear(); }
+
+		void setQuadratic(float quadratic) { m_lightData->setQuadratic(quadratic); }
+		float getQuadratic() const { return m_lightData->getQuadratic(); }
+		// spotlight off
 
 		// Light Material
-		const glm::vec3& getMaterialAmbient()   const  { return m_lightObjectMaterial.m_ambient;   };
-		const glm::vec3& getMaterialDiffuse()   const  { return m_lightObjectMaterial.m_diffuse;   };
-		const glm::vec3& getMaterialSpecular()  const  { return m_lightObjectMaterial.m_specular;  };
-		const	   float getMaterialShininess() const  { return m_lightObjectMaterial.m_shininess; };
+		void setLightAmbient(const glm::vec3& ambient) { m_lightObjectColor.m_ambient = ambient; };
+		void setLightDiffuse(const glm::vec3& diffuse) { m_lightObjectColor.m_diffuse = diffuse; };
+		void setLightSpecular(const glm::vec3& specular) { m_lightObjectColor.m_specular = specular; };
+		const glm::vec3& getLightAmbient()   const  { return m_lightObjectColor.m_ambient;   };
+		const glm::vec3& getLightDiffuse()   const  { return m_lightObjectColor.m_diffuse;   };
+		const glm::vec3& getLightSpecular()  const  { return m_lightObjectColor.m_specular;  };
 
-		const Material& getObjectMaterial() const { return m_lightObjectMaterial; };
+		LightColor& getLightColorProperties() { return m_lightObjectColor; };
+
+		bool isValid() const { return m_SceneObject != nullptr && m_lightData != nullptr; };
+
+		void setSceneObjectID(uint32_t id) { m_sceneObjectID = id; };
+		uint32_t getSceneObjectID() const { return m_sceneObjectID; };
 
 	private:
 		std::shared_ptr<SCENE::SceneObject> m_SceneObject;
+
+		uint32_t m_sceneObjectID = 0;
+
 		std::shared_ptr<LightData> m_lightData;
 
 		LightType m_type;
 
-		Material m_lightObjectMaterial;
+		LightColor m_lightObjectColor;
 	};
 }

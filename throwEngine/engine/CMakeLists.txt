@@ -57,10 +57,12 @@ target_sources(engine PRIVATE
     src/Input/Input.cpp
     src/Input/InputContext.cpp
     src/Input/InputComponent.cpp
+    src/Input/InputComponentFactory.cpp
 
     include/Input/Input.h
     include/Input/InputContext.h
     include/Input/InputComponent.h
+    include/Input/InputComponentFactory.h
 )
 
 # Callback
