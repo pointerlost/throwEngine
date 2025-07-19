@@ -1,0 +1,45 @@
+name: CI
+
+on: 
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            setup-cmd: chmod +x setup.sh && ./setup.sh
+          - os: windows-latest  
+            setup-cmd: .\setup.bat
+          - os: macos-latest
+            setup-cmd: chmod +x setup.sh && ./setup.sh
+
+    steps:
+    - uses: actions/checkout@v3
+      
+    - name: Cache vcpkg
+      uses: actions/cache@v3
+      with:
+        path: |
+          vcpkg
+          build/vcpkg_installed
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+        
+    - name: Setup CMake
+      uses: actions/setup-cmake@v3
+      
+    - name: Build Project
+      run: ${{ matrix.setup-cmd }}
+      
+    - name: Upload Artifacts
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-${{ matrix.os }}
+        path: build
