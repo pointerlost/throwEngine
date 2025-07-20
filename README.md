@@ -1,8 +1,31 @@
 # throwEngine
 
-🎮 A cross-platform C++ game engine built with CMake and vcpkg.
+A simple and beginner-friendly 3D game engine built with C++, CMake and OpenGL.
+This engine currently working with cross-platform.
 
-Designed for modularity, flexibility, and simplicity — this engine is ideal for learning or prototyping.
+## About the Engine
+
+throwEngine is a minimal 3D game engine designed to help beginners(like me -_-) understand
+the basics of game development and graphics programming.
+
+It's not focused on high performance or advanced features - instead,
+it aims to teach you how a simple engine works.
+
+## The engine includes
+- 3D rendering with OpenGL (maybe an other time i can add vulkan too.)
+- Simple Camera and Material System
+- Basic Lighting
+- Modular Architecture (I'm actually working on it quite a bit.)
+- Integration with popular libraries (like GLFW, GLM, stb_image, ImGui, glad and etc.)
+
+## Getting Started
+
+### Prerequisites
+- C++17 or newer
+- CMake >= 3.21
+- OpenGL-compatible GPU
+- Git
+- vcpkg
 
 ---
 
