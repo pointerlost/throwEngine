@@ -8,9 +8,10 @@
   "configurePresets": [
     {
       "name": "default",
-      "generator": "Ninja",
+      "displayName": "Default",
       "description": "Use this preset to build throwEngine",
-      "hidden": false,
+      "generator": "",
+
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
