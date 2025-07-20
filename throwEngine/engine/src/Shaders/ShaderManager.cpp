@@ -7,7 +7,7 @@
 #include "Shaders/LightShader.h"
 #include "Shaders/BasicShader.h"
 
-#include "config.h"
+#include "Config.h"
 #include <core/Logger.h>
 #include "core/Debug.h"
 #define DEBUG_PTR(ptr) DEBUG::DebugForEngineObjectPointers(ptr)

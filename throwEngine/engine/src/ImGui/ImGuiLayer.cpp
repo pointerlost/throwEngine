@@ -1,4 +1,4 @@
-#include "ImGui/imGuiLayer.h"
+#include "ImGui/ImGuiLayer.h"
 
 #include "ImGui/ImGuiScoped.h"
 

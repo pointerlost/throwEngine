@@ -28,13 +28,13 @@
 
 #include <graphics/Lighting/Light.h>
 
-#include "shaders/ShaderManager.h"
+#include "Shaders/ShaderManager.h"
 
-#include "shaders/BasicShader.h"
+#include "Shaders/BasicShader.h"
 
-#include "shaders/LightShader.h"
+#include "Shaders/LightShader.h"
 
-#include "shaders/GridShader.h"
+#include "Shaders/GridShader.h"
 
 #include "graphics/Material/MaterialLib.h"
 

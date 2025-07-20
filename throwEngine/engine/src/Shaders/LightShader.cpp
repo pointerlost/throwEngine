@@ -8,7 +8,7 @@
 
 #include <graphics/Material/MaterialLib.h>
 
-#include "scene/SceneObject.h"
+#include "Scene/SceneObject.h"
 
 #include "core/Logger.h"
 #include "core/Debug.h"

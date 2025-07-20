@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <memory>
 
 namespace GLgraphics { class Transformations; };
 
