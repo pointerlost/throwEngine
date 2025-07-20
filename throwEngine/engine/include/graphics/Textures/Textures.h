@@ -5,7 +5,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "graphics/Textures/stb_image.h"
+#include "include/graphics/Textures/stb_image.h"
 
 namespace TEXTURE
 {

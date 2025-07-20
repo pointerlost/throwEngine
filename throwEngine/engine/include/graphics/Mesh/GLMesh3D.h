@@ -1,5 +1,7 @@
 #pragma once
+#include <iostream>
 #include <cstddef>
+#include <memory>
 #include "graphics/Mesh/GLMeshInterface.h"
 
 namespace GLgraphics

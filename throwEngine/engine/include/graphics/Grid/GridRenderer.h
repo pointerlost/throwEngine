@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <memory>
 
 namespace CAMERA { class Camera;  };
 namespace SHADER
