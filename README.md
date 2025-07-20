@@ -5,8 +5,8 @@ This engine currently working with cross-platform.
 
 ## About the Engine
 
-throwEngine is a minimal 3D game engine designed to help beginners(like me -_-) understand
-the basics of game development and graphics programming.
+throwEngine is a minimal 3D game engine designed
+to help beginners(like me -_-) understand the basics of game development and graphics programming.
 
 It's not focused on high performance or advanced features - instead,
 it aims to teach you how a simple engine works.
