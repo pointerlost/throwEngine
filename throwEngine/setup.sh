@@ -18,11 +18,12 @@ else
 fi
 echo "⚙️ Using CMake generator: $GENERATOR"
 
-# Configure build directory
-cmake -B build -G "$GENERATOR" -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Debug
+# Configure
+cmake -B build -G "$GENERATOR" \
+  -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake \
+  -DCMAKE_BUILD_TYPE=Debug
 
-# Build project
+# Build
 cmake --build build --parallel
 
 echo "✅ Setup complete! Run: ./build/bin/SampleGame"
-
