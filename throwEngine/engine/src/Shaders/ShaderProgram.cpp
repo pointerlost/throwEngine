@@ -100,7 +100,7 @@ namespace SHADER
 		return checkShaderCompilingErrors(0, m_programID);
 	}
 
-	bool GLShaderProgram::checkShaderCompilingErrors(GLenum shaderType = 0, unsigned int objectID = 0)
+	bool GLShaderProgram::checkShaderCompilingErrors(GLenum shaderType, unsigned int objectID)
 	{
 		int success = 0;
 		char infoLog[1024];
