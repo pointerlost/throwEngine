@@ -8,6 +8,12 @@ if not exist "vcpkg" (
   call .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
 )
 
+where cmake >nul 2>nul
+if %errorlevel% neq 0 (
+    echo CMake not found. Please install it and add to PATH.
+    exit /b 1
+)
+
 :: Configure build
 cmake -B build -DCMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake
 cmake --build build --parallel

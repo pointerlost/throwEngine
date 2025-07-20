@@ -1,14 +1,24 @@
 #!/bin/bash
+set -e
 
+echo "🚀 Building throwEngine..."
+
+# Set fallback VCPKG_ROOT
 if [ -z "$VCPKG_ROOT" ]; then
-  echo "VCPKG_ROOT is not set. Trying default at $HOME/vcpkg"
   export VCPKG_ROOT="$HOME/vcpkg"
+  echo "🔍 VCPKG_ROOT not set. Using: $VCPKG_ROOT"
 fi
 
+# Auto-bootstrap vcpkg if needed
 if [ ! -f "$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" ]; then
-  echo "Error: vcpkg toolchain file not found at $VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
-  exit 1
+  echo "📦 Bootstrapping vcpkg..."
+  if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+    ./vcpkg/bootstrap-vcpkg.bat
+  else
+    ./vcpkg/bootstrap-vcpkg.sh
+  fi
 fi
 
 cmake --preset=default
 cmake --build build
+
