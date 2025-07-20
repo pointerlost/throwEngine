@@ -97,7 +97,7 @@ namespace SHADER
 		glAttachShader(m_programID, fragment);
 		glLinkProgram(m_programID);
 
-		return checkShaderCompilingErrors(NULL, m_programID);
+		return checkShaderCompilingErrors(nullptr, m_programID);
 	}
 
 	bool GLShaderProgram::checkShaderCompilingErrors(GLenum shaderType, unsigned int objectID)

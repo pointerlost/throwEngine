@@ -1,4 +1,7 @@
 #pragma once
+#include <iostream>
+#include <vector>
+#include <memory>
 #include "Shaders/ShaderInterface.h"
 
 namespace LIGHTING { class  Light;	     };
