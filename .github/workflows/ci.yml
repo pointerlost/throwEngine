@@ -1,6 +1,6 @@
 name: CI
 
-on: 
+on:
   push:
     branches: [ main ]
   pull_request:
@@ -15,28 +15,29 @@ jobs:
         include:
           - os: ubuntu-latest
             setup-cmd: chmod +x setup.sh && ./setup.sh
-          - os: windows-latest  
+          - os: windows-latest
             setup-cmd: .\setup.bat
           - os: macos-latest
             setup-cmd: chmod +x setup.sh && ./setup.sh
 
     steps:
-    - uses: actions/checkout@v3
-      
-    - name: Cache vcpkg
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Cache vcpkg and build
       uses: actions/cache@v3
       with:
         path: |
           vcpkg
           build/vcpkg_installed
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
-        
-    - name: Setup CMake
-      uses: actions/setup-cmake@v3
-      
-    - name: Build Project
+
+    - name: Set up CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Run Setup Script
       run: ${{ matrix.setup-cmd }}
-      
+
     - name: Upload Artifacts
       if: success()
       uses: actions/upload-artifact@v3
