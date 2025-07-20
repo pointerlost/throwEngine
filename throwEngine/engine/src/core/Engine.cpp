@@ -26,6 +26,9 @@
 
 #include "graphics/Lighting/LightManager.h"
 
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 #include "graphics/Camera/Camera.h"
 
 #include <Input/Input.h>
