@@ -18,13 +18,14 @@ add_library(engine STATIC)
 target_include_directories(engine
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb
         ${SHADERS_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}/engine
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${VCPKG_ROOT}/installed/x64-windows/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/graphics/Textures
+        
 )
 
 target_compile_features(engine PUBLIC cxx_std_23)
