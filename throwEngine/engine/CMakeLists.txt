@@ -24,6 +24,7 @@ target_include_directories(engine
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${VCPKG_ROOT}/installed/x64-windows/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/graphics/Textures
 )
 
 target_compile_features(engine PUBLIC cxx_std_23)
