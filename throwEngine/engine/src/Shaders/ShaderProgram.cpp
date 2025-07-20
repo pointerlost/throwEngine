@@ -97,10 +97,10 @@ namespace SHADER
 		glAttachShader(m_programID, fragment);
 		glLinkProgram(m_programID);
 
-		return checkShaderCompilingErrors(nullptr, m_programID);
+		return checkShaderCompilingErrors(0, m_programID);
 	}
 
-	bool GLShaderProgram::checkShaderCompilingErrors(GLenum shaderType, unsigned int objectID)
+	bool GLShaderProgram::checkShaderCompilingErrors(GLenum shaderType = 0, unsigned int objectID = 0)
 	{
 		int success = 0;
 		char infoLog[1024];

@@ -44,7 +44,7 @@ namespace SHADER {
 	protected:
 		void createShader(GLenum shaderType, const char* shaderPath);
 		bool createProgram(unsigned int vertex, unsigned int fragment);
-		bool checkShaderCompilingErrors(GLenum shaderType, unsigned int shader);
+		bool checkShaderCompilingErrors(GLenum shaderType = 0, unsigned int shader = 0);
 
 	private:
 		unsigned int m_vertexID, m_fragmentID;
