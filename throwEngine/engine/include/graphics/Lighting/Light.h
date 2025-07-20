@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-
+#include <memory>
 #include <graphics/Lighting/LightData.h>
 
 namespace SCENE { class SceneObject; }

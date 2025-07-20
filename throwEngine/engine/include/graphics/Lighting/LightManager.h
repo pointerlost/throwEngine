@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <memory>
 #include "graphics/Lighting/Light.h"
 
 namespace LIGHTING

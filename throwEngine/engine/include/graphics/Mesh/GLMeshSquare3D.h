@@ -1,5 +1,6 @@
 #pragma once
-#pragma once
+#include <iostream>
+
 #include "graphics/Mesh/GLMesh3D.h"
 
 #include "graphics/Mesh/GLMeshData3D.h"

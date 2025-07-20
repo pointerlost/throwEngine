@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include "Input/InputContext.h"
 
 namespace GLgraphics { class Transformations; };

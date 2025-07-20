@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+#include <memory>
 #include "graphics/Grid/GridRenderer.h"
 
 namespace CAMERA { class Camera;   };

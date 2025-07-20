@@ -1,6 +1,7 @@
 #pragma once
 #define GLM_ENABLE_EXPERIMENTAL
 #include <iostream>
+#include <memory>
 #include <glm/gtx/string_cast.hpp>
 
 namespace SCENE { class Scene;	  };
