@@ -1,0 +1,62 @@
+# === BUILD OUTPUT & TEMP FILES ===
+build*/
+out*/
+**/build*/
+**/out*/
+
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.obj
+*.log
+*.tlog
+*.pch
+*.pdb
+*.ilk
+*.cache
+*.db
+*.VC.db
+
+# CMake presets output (if used)
+build_debug/
+build_release/
+
+# Keep top-level build folder structure
+!build/
+
+# === IDE FILES (Visual Studio, VSCode, etc.) ===
+.vs/
+*.sln
+*.vcxproj*
+*.opensdf
+*.sdf
+*.ipch
+*.user
+*.suo
+.vscode/
+*.code-workspace
+
+# === VCPKG ===
+vcpkg_installed/
+**/vcpkg_installed/
+.vcpkg-root
+*.nupkg
+*.snupkg
+
+# === THIRD-PARTY ===
+external/
+thirdparty/
+*.lib
+*.dll
+*.exp
+
+# === SYSTEM/OS FILES ===
+.DS_Store
+Thumbs.db
+
+# === YOUR PROJECT FOLDERS (ALLOW ORIGINALS) ===
+!assets/
+!GLSL/
+!configs/
+!shaders/
