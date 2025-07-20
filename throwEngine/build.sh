@@ -12,11 +12,8 @@ fi
 # Auto-bootstrap vcpkg if needed
 if [ ! -f "$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" ]; then
   echo "📦 Bootstrapping vcpkg..."
-  if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    ./vcpkg/bootstrap-vcpkg.bat
-  else
-    ./vcpkg/bootstrap-vcpkg.sh
-  fi
+  git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+  "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics
 fi
 
 # Detect generator
@@ -27,11 +24,15 @@ else
 fi
 echo "⚙️ Using CMake generator: $GENERATOR"
 
-# Configure build directory
-cmake -B build -G "$GENERATOR" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Debug
+# Clean old build (optional but safe for CI)
+rm -rf build
+
+# Configure
+cmake -B build -G "$GENERATOR" \
+  -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
+  -DCMAKE_BUILD_TYPE=Debug
 
 # Build
 cmake --build build --parallel
 
 echo "✅ Build finished!"
-
