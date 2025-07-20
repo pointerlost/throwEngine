@@ -26,7 +26,8 @@ Clone and build the engine with one command:
 ### On Linux/macOS
 ```bash
 git clone https://github.com/pointerlost/throwEngine.git
-cd throwEngine && ./setup.sh
+cd throwEngine
+.\setup.sh
 ```
 On Windows (PowerShell or CMD)
 ```
