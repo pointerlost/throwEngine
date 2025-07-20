@@ -8,15 +8,16 @@ This engine currently working with cross-platform.
 throwEngine is a minimal 3D game engine designed
 to help beginners(like me -_-) understand the basics of game development and graphics programming.
 
-It's not focused on high performance or advanced features - instead,
-it aims to teach you how a simple engine works.
+It's not focused on high performance or advanced features -
+instead, it aims to teach you how a simple engine works.
 
-## The engine includes
+## Features
+
 - 3D rendering with OpenGL (maybe an other time i can add vulkan too.)
-- Simple Camera and Material System
-- Basic Lighting
-- Modular Architecture (I'm actually working on it quite a bit.)
-- Integration with popular libraries (like GLFW, GLM, stb_image, ImGui, glad and etc.)
+- Simple camera and material System
+- Basic lighting
+- Modular architecture (i'm actually working on it quite a bit.)
+- Integration with popular libraries (like GLFW, GLM, stb_image, ImGui, glad and more.)
 
 ## Getting Started
 
