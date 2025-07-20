@@ -19,6 +19,21 @@ Before you build, make sure you have these installed:
 
 ---
 
+## 🛠 Quick Setup (Recommended)
+
+Clone and build the engine with one command:
+
+### On Linux/macOS
+```bash
+git clone https://github.com/pointerlost/throwEngine.git
+cd throwEngine && ./setup.sh
+
+On Windows (PowerShell or CMD)
+
+git clone https://github.com/pointerlost/throwEngine.git
+cd throwEngine
+.\setup.bat
+
 ## 🚀 Getting Started
 
 You have two options:
