@@ -6,6 +6,6 @@
     "glad",
     "glm",
     "nlohmann-json",
-    "imgui"
+    "imgui[core,glfw-binding,opengl3-binding]"
   ]
 }
