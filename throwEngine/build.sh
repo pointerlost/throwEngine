@@ -3,17 +3,12 @@ set -e
 
 echo "🚀 Building throwEngine..."
 
-# Set fallback VCPKG_ROOT
-if [ -z "$VCPKG_ROOT" ]; then
-  export VCPKG_ROOT="$HOME/vcpkg"
-  echo "🔍 VCPKG_ROOT not set. Using: $VCPKG_ROOT"
-fi
+# Use relative vcpkg path inside project
+VCPKG_TOOLCHAIN_FILE="./vcpkg/scripts/buildsystems/vcpkg.cmake"
 
-# Auto-bootstrap vcpkg if needed
-if [ ! -f "$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" ]; then
-  echo "📦 Bootstrapping vcpkg..."
-  git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
-  "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics
+if [ ! -f "$VCPKG_TOOLCHAIN_FILE" ]; then
+  echo "❌ vcpkg not bootstrapped! Please run ./setup.sh first."
+  exit 1
 fi
 
 # Detect generator
@@ -22,17 +17,11 @@ if command -v ninja >/dev/null 2>&1; then
 else
   GENERATOR="Unix Makefiles"
 fi
+
 echo "⚙️ Using CMake generator: $GENERATOR"
 
-# Clean old build (optional but safe for CI)
-rm -rf build
-
-# Configure
-cmake -B build -G "$GENERATOR" \
-  -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
-  -DCMAKE_BUILD_TYPE=Debug
-
-# Build
+# Configure and build
+cmake -B build -G "$GENERATOR" -DCMAKE_TOOLCHAIN_FILE="$VCPKG_TOOLCHAIN_FILE" -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --parallel
 
-echo "✅ Build finished!"
+echo "✅ Build finished! Run ./build/bin/SampleGame"
