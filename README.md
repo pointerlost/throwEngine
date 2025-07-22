@@ -1,5 +1,9 @@
 # throwEngine
 
+### Warning
+This engine includes basic scenes, lighting, object creation, and more.
+But it still needs some refactoring to improve the structure. For example, I lost my GLSL files. :)
+
 A simple and beginner-friendly 3D game engine built with C++, CMake and OpenGL.
 This engine currently works cross-platform.
 
